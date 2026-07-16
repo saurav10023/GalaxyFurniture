@@ -1,12 +1,12 @@
 // src/routes/AdminRoutes.jsx
 import { Routes, Route } from "react-router-dom";
-import AdminRouteGuard from "../components/admin/layout/AdminRouteGuard";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import AdminHome from "../pages/admin/AdminHome";
+import AdminRouteGuard from "../components/Admin/layout/AdminRouteGuard";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
+import AdminHome from "../pages/Admin/AdminHome";
 import ProductManagement from "../pages/admin/ProductManagement";
 import SellOut from "../pages/admin/SellOut";
-import Analytics from "../pages/admin/Analytics";
-import PaymentsDue from "../pages/admin/PaymentsDue";
+import Analytics from "../pages/Admin/Analytics";
+import PaymentsDue from "../pages/Admin/PaymentsDue";
 
 // Mount this at /admin/* in your main router, e.g.:
 //   <Route path="/admin/*" element={<AdminRoutes />} />
