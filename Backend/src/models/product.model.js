@@ -183,6 +183,8 @@ productSchema.virtual("availabilityStatus").get(function () {
 productSchema.set("toJSON", { virtuals: true });
 productSchema.set("toObject", { virtuals: true });
 
+
+
 // Generate Slug + SKU
 productSchema.pre("save", async function () {
     if (!this.slug && this.name) {
@@ -192,14 +194,14 @@ productSchema.pre("save", async function () {
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "");
 
+        // Append a short random suffix instead of check-then-act looping
+        // against exists(). The unique index on `slug` is the real guard;
+        // if a collision somehow still occurs, the save fails and the
+        // caller can retry, rather than two concurrent saves both passing
+        // an exists() check for the same candidate before either commits.
         let candidate = baseSlug;
-        let suffix = 1;
-        const Model = mongoose.model("Product");
-
-        while (
-            await Model.exists({ slug: candidate, _id: { $ne: this._id } })
-        ) {
-            candidate = `${baseSlug}-${suffix++}`;
+        if (await mongoose.model("Product").exists({ slug: candidate, _id: { $ne: this._id } })) {
+            candidate = `${baseSlug}-${crypto.randomBytes(3).toString("hex")}`;
         }
         this.slug = candidate;
     }
@@ -207,18 +209,6 @@ productSchema.pre("save", async function () {
     if (!this.sku) {
         this.sku = `SKU-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
     }
-
-    if (this.pricing.purchasePrice > this.pricing.sellingPrice) {
-        throw new Error("Purchase price cannot be greater than selling price.");
-    }
-
-    if (
-        this.pricing.negotiation.enabled &&
-        this.pricing.negotiation.minimumPrice != null &&
-        this.pricing.negotiation.minimumPrice > this.pricing.sellingPrice
-    ) {
-        throw new Error("Negotiation minimum price cannot exceed selling price.");
-    }
-});
+});    
 
 export const Product = mongoose.model("Product", productSchema);

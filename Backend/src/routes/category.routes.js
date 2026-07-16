@@ -41,4 +41,4 @@ router
     .patch(verifyjwt, verifyAdmin, updateCategoryField)
     .delete(verifyjwt, verifyAdmin, removeCategoryField);
 
-export default router;
+export default router; 

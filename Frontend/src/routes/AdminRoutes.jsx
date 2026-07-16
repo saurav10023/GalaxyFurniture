@@ -1,10 +1,10 @@
 // src/routes/AdminRoutes.jsx
 import { Routes, Route } from "react-router-dom";
-import AdminRouteGuard from "../components/Admin/layout/AdminRouteGuard";
+import AdminRouteGuard from "../components/admin/layout/AdminRouteGuard";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
 import AdminHome from "../pages/Admin/AdminHome";
 import ProductManagement from "../pages/admin/ProductManagement";
-import SellOut from "../pages/admin/SellOut";
+import SellOut from "../pages/Admin/SellOut";
 import Analytics from "../pages/Admin/Analytics";
 import PaymentsDue from "../pages/Admin/PaymentsDue";
 
