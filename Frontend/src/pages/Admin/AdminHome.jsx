@@ -23,7 +23,17 @@ const SECTIONS = [
         to: "/admin/payments",
         title: "Payments Due",
         description: "Customers who still owe money on a sale."
-    }
+    },
+    {
+        to: "/admin/payments/history",
+        title: "Payment History",
+        description: "Search and edit every payment ever recorded."
+    },
+    {
+    to: "/admin/sales/history",
+    title: "Sales History",
+    description: "Search and edit every sale ever recorded."
+    },
 ];
 
 export default function AdminHome() {

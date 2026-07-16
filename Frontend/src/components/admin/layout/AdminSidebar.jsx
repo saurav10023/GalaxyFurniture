@@ -7,7 +7,9 @@ const NAV_ITEMS = [
     { to: "/admin/products", label: "Products" },
     { to: "/admin/sell-out", label: "Sell Out" },
     { to: "/admin/analytics", label: "Analytics" },
-    { to: "/admin/payments", label: "Payments" }
+    { to: "/admin/sales/history", label: "Sales History" },
+    { to: "/admin/payments", label: "Payment Dues" },
+    { to: "/admin/payments/history", label: "Payment History" } 
 ];
 
 const linkClasses = ({ isActive }) =>

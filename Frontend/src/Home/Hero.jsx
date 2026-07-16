@@ -6,10 +6,24 @@ import API from "../api/axios";
 // Furniture-relevant spec chips — mirrors the reference component's
 // buildSpecChips shape but swapped for fields a furniture catalog actually
 // carries (material / dimensions / color / warranty) instead of phone specs.
+//
+// dimensions comes back as an object ({length, width, height, unit}), not a
+// string, so it's formatted into a display label before being added to the
+// chips array — pushing the raw object caused a "Objects are not valid as a
+// React child" crash when chips were rendered.
+const formatDimensions = (dimensions) => {
+  if (!dimensions) return null;
+  const { length, width, height, unit } = dimensions;
+  const parts = [length, width, height].filter((v) => v !== undefined && v !== null && v !== "");
+  if (parts.length === 0) return null;
+  return `${parts.join(" × ")}${unit ? ` ${unit}` : ""}`;
+};
+
 const buildSpecChips = (p) => {
   const chips = [];
   if (p.material) chips.push(p.material);
-  if (p.dimensions) chips.push(p.dimensions);
+  const dimensionsLabel = formatDimensions(p.dimensions);
+  if (dimensionsLabel) chips.push(dimensionsLabel);
   if (p.color) chips.push(p.color);
   if (p.warranty) chips.push(p.warranty);
   return chips.slice(0, 3);
@@ -56,6 +70,7 @@ const Hero = () => {
   const next = () => goTo((active + 1) % products.length);
 
   const current = products[active];
+  const currentChips = current ? buildSpecChips(current) : [];
 
   const handleCardClick = () => {
     if (!current?._id) return;
@@ -207,11 +222,11 @@ const Hero = () => {
                   {current.brand}
                   {current.category ? ` · ${current.category}` : ""}
                 </p>
-                {buildSpecChips(current).length > 0 && (
+                {currentChips.length > 0 && (
                   <div className="hidden sm:flex flex-wrap gap-1 mt-2">
-                    {buildSpecChips(current).map((chip) => (
+                    {currentChips.map((chip, i) => (
                       <span
-                        key={chip}
+                        key={i}
                         className="font-mono text-[9.5px] text-[#F6F1E7]/70 border border-[#3B2A22] rounded-full px-2 py-0.5"
                       >
                         {chip}

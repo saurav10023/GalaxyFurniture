@@ -7,7 +7,9 @@ const PAGE_TITLES = {
     "/admin/products": "Product Management",
     "/admin/sell-out": "Sell Out",
     "/admin/analytics": "Analytics",
-    "/admin/payments": "Payments Due"
+    "/admin/payments": "Payments Due",
+    "/admin/payments/history": "Payment History" ,
+    "/admin/sales/history": "Sales History",
 };
 
 export default function AdminTopbar() {

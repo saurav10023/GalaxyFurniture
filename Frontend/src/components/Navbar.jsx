@@ -11,19 +11,29 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
 function useCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/categories?active=true`);
+        const res = await fetch(`${API_BASE}/api/v1/categories`);
         if (!res.ok) throw new Error("Failed to load categories");
-        const data = await res.json();
-        if (!cancelled) setCategories(Array.isArray(data) ? data : data.categories || []);
+        const json = await res.json();
+        // Backend wraps the payload as { data: [...] } (ApiResponse envelope),
+        // not { categories: [...] } — unwrap accordingly.
+        const list = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+        if (!cancelled) {
+          setCategories(list);
+          setError(false);
+        }
       } catch (err) {
         console.error("Navbar: could not load categories", err);
-        if (!cancelled) setCategories([]);
+        if (!cancelled) {
+          setCategories([]);
+          setError(true);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -35,7 +45,7 @@ function useCategories() {
     };
   }, []);
 
-  return { categories, loading };
+  return { categories, loading, error };
 }
 
 // Header gains a solid backdrop + shadow once the page has scrolled past
@@ -163,7 +173,7 @@ const Navbar = () => {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -254,11 +264,16 @@ const Navbar = () => {
                   <span key={i} className="h-[30px] w-20 rounded-full bg-white/10 animate-pulse mx-0.5" />
                 ))}
 
-              {!categoriesLoading && categories.length === 0 && (
+              {!categoriesLoading && categoriesError && (
+                <span className="text-[13px] text-[#E27D64] italic px-2">Couldn't load categories</span>
+              )}
+
+              {!categoriesLoading && !categoriesError && categories.length === 0 && (
                 <span className="text-[13px] text-[#F6F1E7]/45 italic px-2">No categories yet</span>
               )}
 
               {!categoriesLoading &&
+                !categoriesError &&
                 inlineCategories.map((cat) => {
                   const isActive = activeCategory === cat.slug;
                   return (
@@ -276,7 +291,7 @@ const Navbar = () => {
                   );
                 })}
 
-              {!categoriesLoading && overflowCategories.length > 0 && (
+              {!categoriesLoading && !categoriesError && overflowCategories.length > 0 && (
                 <div className="relative" ref={moreRef}>
                   <button
                     onClick={() => setMoreOpen((v) => !v)}
@@ -508,13 +523,20 @@ const Navbar = () => {
                   <span key={i} className="h-11 rounded-lg bg-white/[0.06] animate-pulse" />
                 ))}
 
-              {!categoriesLoading && categories.length === 0 && (
+              {!categoriesLoading && categoriesError && (
+                <span className="px-3 py-2.5 text-[14px] text-[#E27D64] italic">
+                  Couldn't load categories — check your connection
+                </span>
+              )}
+
+              {!categoriesLoading && !categoriesError && categories.length === 0 && (
                 <span className="px-3 py-2.5 text-[14px] text-[#F6F1E7]/45 italic">
                   No categories yet — check back soon
                 </span>
               )}
 
               {!categoriesLoading &&
+                !categoriesError &&
                 categories.map((cat) => {
                   const isActive = activeCategory === cat.slug;
                   return (

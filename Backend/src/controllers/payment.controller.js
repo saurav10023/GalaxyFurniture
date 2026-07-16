@@ -132,8 +132,52 @@ const getPaymentsByCustomer = asyncHandler(async (req, res) => {
 
 // ---- GET ALL PAYMENTS (accounting ledger view — date range, mode filter) ----
 // Admin only. Powers a "payments received this week" style report.
+// const getAllPayments = asyncHandler(async (req, res) => {
+//     const { dateFrom, dateTo, mode, page = 1, limit = 20 } = req.query;
+
+//     const filter = {};
+
+//     if (mode) {
+//         if (!VALID_MODES.includes(mode)) {
+//             throw new ApiError(400, `Invalid payment mode. Allowed: ${VALID_MODES.join(", ")}`);
+//         }
+//         filter.mode = mode;
+//     }
+
+//     if (dateFrom || dateTo) {
+//         filter.paidOn = {};
+//         if (dateFrom) filter.paidOn.$gte = new Date(dateFrom);
+//         if (dateTo) filter.paidOn.$lte = new Date(dateTo);
+//     }
+
+//     const skip = (Number(page) - 1) * Number(limit);
+
+//     const [payments, total] = await Promise.all([
+//         Payment.find(filter)
+//             .populate("customer", "name phone")
+//             .populate("sale", "invoiceNumber")
+//             .sort({ paidOn: -1 })
+//             .skip(skip)
+//             .limit(Number(limit)),
+//         Payment.countDocuments(filter)
+//     ]);
+
+//     return res.status(200).json(
+//         new ApiResponse(
+//             200,
+//             {
+//                 payments,
+//                 pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) }
+//             },
+//             "Payments fetched successfully"
+//         )
+//     );
+// });
+// ---- GET ALL PAYMENTS (accounting ledger view — search, date range, mode filter) ----
+// Admin only. Powers a full payments-history page.
+// search matches customer name/phone OR the sale's invoiceNumber.
 const getAllPayments = asyncHandler(async (req, res) => {
-    const { dateFrom, dateTo, mode, page = 1, limit = 20 } = req.query;
+    const { search, dateFrom, dateTo, mode, page = 1, limit = 20 } = req.query;
 
     const filter = {};
 
@@ -148,6 +192,37 @@ const getAllPayments = asyncHandler(async (req, res) => {
         filter.paidOn = {};
         if (dateFrom) filter.paidOn.$gte = new Date(dateFrom);
         if (dateTo) filter.paidOn.$lte = new Date(dateTo);
+    }
+
+    if (search?.trim()) {
+        const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        const [matchingCustomers, matchingSales] = await Promise.all([
+            Customer.find({
+                $or: [{ name: { $regex: escaped, $options: "i" } }, { phone: { $regex: escaped } }]
+            }).select("_id"),
+            Sale.find({ invoiceNumber: { $regex: escaped, $options: "i" } }).select("_id")
+        ]);
+
+        const customerIds = matchingCustomers.map((c) => c._id);
+        const saleIds = matchingSales.map((s) => s._id);
+
+        // Nothing matches the search term at all — short-circuit to an
+        // empty page instead of running a filter-less query.
+        if (customerIds.length === 0 && saleIds.length === 0) {
+            return res.status(200).json(
+                new ApiResponse(
+                    200,
+                    { payments: [], pagination: { total: 0, page: Number(page), pages: 0 } },
+                    "Payments fetched successfully"
+                )
+            );
+        }
+
+        filter.$or = [
+            ...(customerIds.length ? [{ customer: { $in: customerIds } }] : []),
+            ...(saleIds.length ? [{ sale: { $in: saleIds } }] : [])
+        ];
     }
 
     const skip = (Number(page) - 1) * Number(limit);

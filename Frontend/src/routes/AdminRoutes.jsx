@@ -7,6 +7,8 @@ import ProductManagement from "../pages/Admin/ProductManagement";
 import SellOut from "../pages/Admin/SellOut";
 import Analytics from "../pages/Admin/Analytics";
 import PaymentsDue from "../pages/Admin/PaymentsDue";
+import PaymentsHistory from "../pages/Admin/PaymentsHistory";
+import SalesHistory from "../pages/Admin/SalesHistory";
 
 // Mount this at /admin/* in your main router, e.g.:
 //   <Route path="/admin/*" element={<AdminRoutes />} />
@@ -25,6 +27,8 @@ export default function AdminRoutes() {
                 <Route path="sell-out" element={<SellOut />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="payments" element={<PaymentsDue />} />
+                <Route path="payments/history" element={<PaymentsHistory />} />
+                <Route path="sales/history" element={<SalesHistory />} />
             </Route>
         </Routes>
     );
