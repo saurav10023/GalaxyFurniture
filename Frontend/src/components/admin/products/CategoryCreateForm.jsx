@@ -9,6 +9,8 @@ const emptyForm = {
     isFeatured: false
 };
 
+const DESCRIPTION_LIMIT = 240;
+
 // onCreated: called with the created category doc — parent (ProductManagement)
 // should use this to refresh CategorySelect's list and/or CategoryProductsBoard.
 export default function CategoryCreateForm({ onCreated }) {
@@ -67,62 +69,107 @@ export default function CategoryCreateForm({ onCreated }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
-            <div>
-                <h2 className="text-lg font-semibold text-slate-800">New category</h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                    Categories group products and can define their own custom fields.
-                </p>
+        <form
+            onSubmit={handleSubmit}
+            className="space-y-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
+        >
+            <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-indigo-600">
+                        <path
+                            d="M4 6h16M4 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </div>
+                <div>
+                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">New category</h2>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                        Categories group products and can define their own custom fields.
+                    </p>
+                </div>
             </div>
 
             {error && (
-                <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-                    {error}
+                <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-500">
+                        <path
+                            d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1.5 1.5 0 003.5 20h17a1.5 1.5 0 001.39-2.06L13.71 3.86a1.5 1.5 0 00-2.42 0z"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                    <span>{error}</span>
                 </div>
             )}
 
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Category name</label>
-                <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    placeholder="e.g. Sofas"
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    required
-                />
+            <div className="space-y-5">
+                <div>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">Category name</label>
+                    <input
+                        type="text"
+                        value={form.name}
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        placeholder="e.g. Sofas"
+                        className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <div className="mb-1.5 flex items-baseline justify-between">
+                        <label className="text-sm font-medium text-slate-700">Description</label>
+                        <span className="text-xs text-slate-400">
+                            {form.description.length}/{DESCRIPTION_LIMIT}
+                        </span>
+                    </div>
+                    <textarea
+                        value={form.description}
+                        onChange={(e) => handleChange("description", e.target.value.slice(0, DESCRIPTION_LIMIT))}
+                        rows={3}
+                        placeholder="A short blurb shown wherever this category appears."
+                        className="w-full resize-none rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                    />
+                </div>
+
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
+                    <span className="text-sm text-slate-700">
+                        Show in <span className="font-medium">"Featured Categories"</span> on the homepage
+                    </span>
+                    <span className="relative inline-flex shrink-0 items-center">
+                        <input
+                            type="checkbox"
+                            checked={form.isFeatured}
+                            onChange={(e) => handleChange("isFeatured", e.target.checked)}
+                            className="peer sr-only"
+                        />
+                        <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
+                        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+                    </span>
+                </label>
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                <textarea
-                    value={form.description}
-                    onChange={(e) => handleChange("description", e.target.value)}
-                    rows={2}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                />
-            </div>
-
-            <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input
-                    type="checkbox"
-                    checked={form.isFeatured}
-                    onChange={(e) => handleChange("isFeatured", e.target.checked)}
-                    className="rounded border-slate-300"
-                />
-                Show in "Featured Categories" on the homepage
-            </label>
-
-            <div className="border-t border-slate-100 pt-4">
+            <div className="border-t border-slate-100 pt-6">
                 <CategoryFieldBuilder fields={fields} onChange={setFields} />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end border-t border-slate-100 pt-5">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
+                    {submitting && (
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                            <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
+                        </svg>
+                    )}
                     {submitting ? "Creating…" : "Create category"}
                 </button>
             </div>

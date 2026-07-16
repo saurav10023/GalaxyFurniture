@@ -25,16 +25,48 @@ const initialForm = {
     initialStock: "" // client-only convenience field, see handleSubmit
 };
 
+const inputClass =
+    "w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
+const smallInputClass =
+    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
+const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
+const smallLabelClass = "mb-1 block text-xs font-medium text-slate-500";
+
+function Toggle({ checked, onChange }) {
+    return (
+        <span className="relative inline-flex shrink-0 items-center">
+            <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+            <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
+            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+        </span>
+    );
+}
+
+function Section({ icon, title, children }) {
+    return (
+        <fieldset className="rounded-xl border border-slate-200 p-4 sm:p-5">
+            <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-700">
+                {icon}
+                {title}
+            </legend>
+            <div className="mt-3 space-y-4">{children}</div>
+        </fieldset>
+    );
+}
+
 // Renders one input, matched to the field's type, for a category's
 // custom attributes — mirrors the type switch in
 // validateAttributesAgainstCategory() on the backend.
 function AttributeInput({ field, value, onChange }) {
-    const common = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
-
     switch (field.type) {
         case "textarea":
             return (
-                <textarea value={value ?? ""} onChange={(e) => onChange(e.target.value)} rows={2} className={common} />
+                <textarea
+                    value={value ?? ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    rows={2}
+                    className={smallInputClass}
+                />
             );
         case "number":
         case "decimal":
@@ -46,30 +78,32 @@ function AttributeInput({ field, value, onChange }) {
                     onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
                     min={field.validation?.min}
                     max={field.validation?.max}
-                    className={common}
+                    className={smallInputClass}
                 />
             );
         case "boolean":
             return (
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(value)}
-                        onChange={(e) => onChange(e.target.checked)}
-                        className="rounded border-slate-300"
-                    />
+                <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                    <Toggle checked={Boolean(value)} onChange={onChange} />
                     Yes
                 </label>
             );
         case "date":
-            return <input type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={smallInputClass} />;
         case "url":
-            return <input type="url" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="url" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={smallInputClass} />;
         case "color":
-            return <input type="color" value={value || "#000000"} onChange={(e) => onChange(e.target.value)} className="h-9 w-16 rounded-md border border-slate-300" />;
+            return (
+                <input
+                    type="color"
+                    value={value || "#000000"}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="h-10 w-16 cursor-pointer rounded-lg border border-slate-300"
+                />
+            );
         case "select":
             return (
-                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common}>
+                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={smallInputClass}>
                     <option value="" disabled>
                         Select…
                     </option>
@@ -91,10 +125,10 @@ function AttributeInput({ field, value, onChange }) {
                             type="button"
                             key={opt}
                             onClick={() => toggle(opt)}
-                            className={`rounded-full border px-3 py-1 text-xs ${
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                                 selected.includes(opt)
                                     ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                    : "border-slate-300 text-slate-600"
+                                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
                             }`}
                         >
                             {opt}
@@ -105,7 +139,7 @@ function AttributeInput({ field, value, onChange }) {
         }
         case "text":
         default:
-            return <input type="text" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="text" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={smallInputClass} />;
     }
 }
 
@@ -117,6 +151,7 @@ export default function ProductCreateForm({ onCreated }) {
     const [categoryFields, setCategoryFields] = useState([]);
     const [attributes, setAttributes] = useState({});
     const [images, setImages] = useState([]);
+    const [isDraggingImages, setIsDraggingImages] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -140,13 +175,21 @@ export default function ProductCreateForm({ onCreated }) {
         setAttributes({}); // reset attributes when category changes — old keys won't validate
     };
 
+    const addImageFiles = (fileList) => {
+        const files = Array.from(fileList || []);
+        if (files.length === 0) return;
+        setImages((prev) => [...prev, ...files].slice(0, MAX_IMAGES));
+    };
+
     const handleImageSelect = (e) => {
-        const files = Array.from(e.target.files || []);
-        setImages((prev) => {
-            const combined = [...prev, ...files].slice(0, MAX_IMAGES);
-            return combined;
-        });
+        addImageFiles(e.target.files);
         e.target.value = ""; // allow re-selecting the same file
+    };
+
+    const handleImageDrop = (e) => {
+        e.preventDefault();
+        setIsDraggingImages(false);
+        addImageFiles(e.dataTransfer.files);
     };
 
     const removeImage = (index) => setImages((prev) => prev.filter((_, i) => i !== index));
@@ -242,181 +285,213 @@ export default function ProductCreateForm({ onCreated }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
-            <div>
-                <h2 className="text-lg font-semibold text-slate-800">New product</h2>
-                <p className="text-sm text-slate-500 mt-0.5">Add a product to the catalog.</p>
+        <form
+            onSubmit={handleSubmit}
+            className="space-y-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
+        >
+            <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-indigo-600">
+                        <path
+                            d="M12 4v16m8-8H4"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </div>
+                <div>
+                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">New product</h2>
+                    <p className="mt-0.5 text-sm text-slate-500">Add a product to the catalog.</p>
+                </div>
             </div>
 
             {error && (
-                <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-                    {error}
+                <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-500">
+                        <path
+                            d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1.5 1.5 0 003.5 20h17a1.5 1.5 0 001.39-2.06L13.71 3.86a1.5 1.5 0 00-2.42 0z"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                    <span>{error}</span>
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Basics */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Product name</label>
+                    <label className={labelClass}>Product name</label>
                     <input
                         type="text"
                         value={form.name}
                         onChange={(e) => set("name", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        className={inputClass}
                         required
                     />
                 </div>
-                <CategorySelect value={categoryId} onChange={handleCategoryChange} />
+                <div>
+                    <label className={labelClass}>Category</label>
+                    <CategorySelect value={categoryId} onChange={handleCategoryChange} />
+                </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Brand</label>
-                    <input
-                        type="text"
-                        value={form.brand}
-                        onChange={(e) => set("brand", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
+                    <label className={labelClass}>Brand</label>
+                    <input type="text" value={form.brand} onChange={(e) => set("brand", e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
+                    <label className={labelClass}>Supplier</label>
                     <input
                         type="text"
                         value={form.supplier}
                         onChange={(e) => set("supplier", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        className={inputClass}
                         required
                     />
                 </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                <label className={labelClass}>Description</label>
                 <textarea
                     value={form.description}
                     onChange={(e) => set("description", e.target.value)}
                     rows={3}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    className={`${inputClass} resize-none`}
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Material</label>
-                    <input
-                        type="text"
-                        value={form.material}
-                        onChange={(e) => set("material", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
+                    <label className={labelClass}>Material</label>
+                    <input type="text" value={form.material} onChange={(e) => set("material", e.target.value)} className={inputClass} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Color</label>
-                    <input
-                        type="text"
-                        value={form.color}
-                        onChange={(e) => set("color", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
+                    <label className={labelClass}>Color</label>
+                    <input type="text" value={form.color} onChange={(e) => set("color", e.target.value)} className={inputClass} />
                 </div>
             </div>
 
-            <fieldset className="rounded-lg border border-slate-200 p-4">
-                <legend className="px-1 text-sm font-medium text-slate-700">Dimensions</legend>
-                <div className="grid grid-cols-4 gap-3">
+            {/* Dimensions */}
+            <Section
+                title="Dimensions"
+                icon={
+                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                        <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                    </svg>
+                }
+            >
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {["length", "width", "height"].map((dim) => (
                         <div key={dim}>
-                            <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">{dim}</label>
+                            <label className={`${smallLabelClass} capitalize`}>{dim}</label>
                             <input
                                 type="number"
                                 min="0"
                                 value={form.dimensions[dim]}
                                 onChange={(e) => set(`dimensions.${dim}`, e.target.value)}
-                                className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                className={smallInputClass}
                             />
                         </div>
                     ))}
                     <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Unit</label>
+                        <label className={smallLabelClass}>Unit</label>
                         <select
                             value={form.dimensions.unit}
                             onChange={(e) => set("dimensions.unit", e.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                            className={smallInputClass}
                         >
                             <option value="cm">cm</option>
                             <option value="inch">inch</option>
                         </select>
                     </div>
                 </div>
-            </fieldset>
+            </Section>
 
-            <fieldset className="rounded-lg border border-slate-200 p-4">
-                <legend className="px-1 text-sm font-medium text-slate-700">Pricing</legend>
-                <div className="grid grid-cols-2 gap-4">
+            {/* Pricing */}
+            <Section
+                title="Pricing"
+                icon={
+                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                        <path
+                            d="M12 2v20M17 5.5H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H6.5"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                        />
+                    </svg>
+                }
+            >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Purchase price</label>
+                        <label className={smallLabelClass}>Purchase price</label>
                         <input
                             type="number"
                             min="0"
                             value={form.pricing.purchasePrice}
                             onChange={(e) => set("pricing.purchasePrice", e.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                            className={smallInputClass}
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Selling price</label>
+                        <label className={smallLabelClass}>Selling price</label>
                         <input
                             type="number"
                             min="0"
                             value={form.pricing.sellingPrice}
                             onChange={(e) => set("pricing.sellingPrice", e.target.value)}
-                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                            className={smallInputClass}
                             required
                         />
                     </div>
                 </div>
-                <div className="mt-3">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Price display</label>
+                <div>
+                    <label className={smallLabelClass}>Price display</label>
                     <select
                         value={form.pricing.displayMode}
                         onChange={(e) => set("pricing.displayMode", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                        className={smallInputClass}
                     >
                         <option value="show_price">Show price</option>
                         <option value="contact_for_price">Contact for price</option>
                         <option value="starting_from">Starting from price</option>
                     </select>
                 </div>
-                <div className="mt-3 space-y-2">
-                    <label className="flex items-center gap-2 text-sm text-slate-600">
-                        <input
-                            type="checkbox"
+                <div className="space-y-3">
+                    <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                        <Toggle
                             checked={form.pricing.negotiation.enabled}
-                            onChange={(e) => set("pricing.negotiation.enabled", e.target.checked)}
-                            className="rounded border-slate-300"
+                            onChange={(v) => set("pricing.negotiation.enabled", v)}
                         />
                         Allow price negotiation
                     </label>
                     {form.pricing.negotiation.enabled && (
                         <div>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">Minimum acceptable price</label>
+                            <label className={smallLabelClass}>Minimum acceptable price</label>
                             <input
                                 type="number"
                                 min="0"
                                 value={form.pricing.negotiation.minimumPrice}
                                 onChange={(e) => set("pricing.negotiation.minimumPrice", e.target.value)}
-                                className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                className={smallInputClass}
                             />
                         </div>
                     )}
                 </div>
-            </fieldset>
+            </Section>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Stock & availability */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                        Starting stock <span className="text-slate-400 font-normal">(optional)</span>
+                    <label className={labelClass}>
+                        Starting stock <span className="font-normal text-slate-400">(optional)</span>
                     </label>
                     <input
                         type="number"
@@ -424,15 +499,15 @@ export default function ProductCreateForm({ onCreated }) {
                         value={form.initialStock}
                         onChange={(e) => set("initialStock", e.target.value)}
                         placeholder="0"
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        className={inputClass}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">When out of stock</label>
+                    <label className={labelClass}>When out of stock</label>
                     <select
                         value={form.outOfStockAction}
                         onChange={(e) => set("outOfStockAction", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        className={inputClass}
                     >
                         <option value="show_as_out_of_stock">Show as "Out of Stock"</option>
                         <option value="hide">Hide from customers</option>
@@ -440,35 +515,30 @@ export default function ProductCreateForm({ onCreated }) {
                 </div>
             </div>
 
-            <div className="flex gap-6">
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                        type="checkbox"
-                        checked={form.isFeatured}
-                        onChange={(e) => set("isFeatured", e.target.checked)}
-                        className="rounded border-slate-300"
-                    />
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
+                <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 sm:flex-1">
+                    <Toggle checked={form.isFeatured} onChange={(v) => set("isFeatured", v)} />
                     Featured product
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                        type="checkbox"
-                        checked={form.isNewArrival}
-                        onChange={(e) => set("isNewArrival", e.target.checked)}
-                        className="rounded border-slate-300"
-                    />
+                <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 sm:flex-1">
+                    <Toggle checked={form.isNewArrival} onChange={(v) => set("isNewArrival", v)} />
                     New arrival
                 </label>
             </div>
 
+            {/* Category-specific attributes */}
             {categoryFields.length > 0 && (
-                <fieldset className="rounded-lg border border-slate-200 p-4 space-y-3">
-                    <legend className="px-1 text-sm font-medium text-slate-700">
-                        Category-specific details
-                    </legend>
+                <Section
+                    title="Category-specific details"
+                    icon={
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                            <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        </svg>
+                    }
+                >
                     {categoryFields.map((field) => (
                         <div key={field.key}>
-                            <label className="block text-xs font-medium text-slate-500 mb-1">
+                            <label className={smallLabelClass}>
                                 {field.name}
                                 {field.required && <span className="text-red-500"> *</span>}
                             </label>
@@ -479,34 +549,28 @@ export default function ProductCreateForm({ onCreated }) {
                             />
                         </div>
                     ))}
-                </fieldset>
+                </Section>
             )}
 
+            {/* Images */}
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Images <span className="text-slate-400 font-normal">(up to {MAX_IMAGES})</span>
+                <label className={labelClass}>
+                    Images <span className="font-normal text-slate-400">(up to {MAX_IMAGES})</span>
                 </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageSelect}
-                    disabled={images.length >= MAX_IMAGES}
-                    className="text-sm"
-                />
+
                 {images.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-3">
+                    <div className="mb-3 grid grid-cols-3 gap-3 sm:grid-cols-5">
                         {images.map((file, i) => (
-                            <div key={i} className="relative">
+                            <div key={i} className="group relative">
                                 <img
                                     src={URL.createObjectURL(file)}
                                     alt={file.name}
-                                    className="h-16 w-16 rounded-md object-cover border border-slate-200"
+                                    className="aspect-square w-full rounded-lg border border-slate-200 object-cover"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeImage(i)}
-                                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-slate-700 text-white text-xs leading-5"
+                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-xs leading-none text-white shadow transition hover:bg-slate-900"
                                     aria-label={`Remove ${file.name}`}
                                 >
                                     ×
@@ -515,14 +579,49 @@ export default function ProductCreateForm({ onCreated }) {
                         ))}
                     </div>
                 )}
+
+                {images.length < MAX_IMAGES && (
+                    <label
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDraggingImages(true);
+                        }}
+                        onDragLeave={() => setIsDraggingImages(false)}
+                        onDrop={handleImageDrop}
+                        className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
+                            isDraggingImages ? "border-indigo-400 bg-indigo-50/60" : "border-slate-200 hover:bg-slate-50"
+                        }`}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-slate-400">
+                            <path
+                                d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                        <p className="text-sm text-slate-500">
+                            <span className="font-medium text-indigo-600">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-slate-400">{MAX_IMAGES - images.length} slot{MAX_IMAGES - images.length === 1 ? "" : "s"} left</p>
+                        <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
+                    </label>
+                )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end border-t border-slate-100 pt-5">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
+                    {submitting && (
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                            <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
+                        </svg>
+                    )}
                     {submitting ? "Creating…" : "Create product"}
                 </button>
             </div>
