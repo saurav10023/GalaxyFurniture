@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCustomerById } from "../../../api/admin/customers.api";
 import RecordPaymentModal from "./RecordPaymentModal";
+import EditPaymentModal from "./EditPaymentModal";
 
 const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
@@ -29,6 +30,7 @@ export default function CustomerDetailDrawer({ customerId, onClose, onPaymentRec
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [payingSale, setPayingSale] = useState(null);
+    const [editingPayment, setEditingPayment] = useState(null);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -47,8 +49,12 @@ export default function CustomerDetailDrawer({ customerId, onClose, onPaymentRec
         load();
     }, [load]);
 
-    const handlePaymentRecorded = () => {
+    // Shared refresh used after recording a new payment OR editing an
+    // existing one — either action can change the customer's balance and
+    // the sales/payments lists, so both routes through here.
+    const refreshAfterChange = () => {
         setPayingSale(null);
+        setEditingPayment(null);
         load(); // refresh this drawer's sales/payments/balance
         onPaymentRecorded?.(); // refresh the customers-due list behind it
     };
@@ -83,9 +89,23 @@ export default function CustomerDetailDrawer({ customerId, onClose, onPaymentRec
                                     <div className="text-xs text-slate-400">Purchases</div>
                                     <div className="text-sm font-semibold text-slate-800">{data.customer.totalPurchases}</div>
                                 </div>
-                                <div className="rounded-lg bg-amber-50 p-3">
-                                    <div className="text-xs text-amber-600">Pending</div>
-                                    <div className="text-sm font-semibold text-amber-700">
+                                <div
+                                    className={`rounded-lg p-3 ${
+                                        data.customer.pendingBalance > 0 ? "bg-amber-50" : "bg-emerald-50"
+                                    }`}
+                                >
+                                    <div
+                                        className={`text-xs ${
+                                            data.customer.pendingBalance > 0 ? "text-amber-600" : "text-emerald-600"
+                                        }`}
+                                    >
+                                        {data.customer.pendingBalance > 0 ? "Pending" : "All dues cleared ✓"}
+                                    </div>
+                                    <div
+                                        className={`text-sm font-semibold ${
+                                            data.customer.pendingBalance > 0 ? "text-amber-700" : "text-emerald-700"
+                                        }`}
+                                    >
                                         {money(data.customer.pendingBalance)}
                                     </div>
                                 </div>
@@ -143,6 +163,13 @@ export default function CustomerDetailDrawer({ customerId, onClose, onPaymentRec
                                                 {p.note ? ` · ${p.note}` : ""}
                                             </span>
                                             <span className="font-medium text-emerald-700">{money(p.amount)}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingPayment(p)}
+                                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                                            >
+                                                Edit
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -156,7 +183,15 @@ export default function CustomerDetailDrawer({ customerId, onClose, onPaymentRec
                 <RecordPaymentModal
                     sale={payingSale}
                     onClose={() => setPayingSale(null)}
-                    onRecorded={handlePaymentRecorded}
+                    onRecorded={refreshAfterChange}
+                />
+            )}
+
+            {editingPayment && (
+                <EditPaymentModal
+                    payment={editingPayment}
+                    onClose={() => setEditingPayment(null)}
+                    onUpdated={refreshAfterChange}
                 />
             )}
         </div>

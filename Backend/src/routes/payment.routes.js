@@ -7,7 +7,8 @@ import {
     getPaymentsBySale,
     getPaymentsByCustomer,
     getAllPayments,
-    deletePayment
+    deletePayment,
+    updatePayment
 } from "../controllers/payment.controller.js";
 
 const router = Router();
@@ -28,7 +29,9 @@ router
 // GET /api/v1/payments/customer/:customerId -> all payments across a customer's sales
 router.route("/customer/:customerId").get(getPaymentsByCustomer);
 
-// DELETE /api/v1/payments/:id  -> correction, reverses Sale + Customer balances
-router.route("/:id").delete(deletePayment);
+router
+    .route("/:id")
+    .patch(updatePayment)
+    .delete(deletePayment);
 
 export default router;

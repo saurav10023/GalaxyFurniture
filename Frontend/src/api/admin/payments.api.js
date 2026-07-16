@@ -30,3 +30,9 @@ export const deletePayment = async (id) => {
     const { data } = await API.delete(`${BASE}/${id}`);
     return data.data;
 };
+
+// body: { amount?, paidOn?, mode?, note? }
+export const updatePayment = async (paymentId, payload) => {
+    const { data } = await API.patch(`${BASE}/${paymentId}`, payload);
+    return data.data; // updated payment
+};

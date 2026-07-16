@@ -218,10 +218,107 @@ const deletePayment = asyncHandler(async (req, res) => {
     }
 });
 
+// ---- EDIT AN EXISTING PAYMENT (correction) ----
+// Admin only. Body: { amount?, paidOn?, mode?, note? } — any subset.
+// Unlike recordPayment (which always creates a new ledger entry), this
+// corrects a single existing entry in place, e.g. a mistyped amount or a
+// wrong date. When amount changes, only the delta is applied to
+// Sale.amountPaid and Customer.pendingBalance, so running balances stay
+// correct no matter how many times a payment gets corrected.
+const updatePayment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { amount, paidOn, mode, note } = req.body;
+
+    if (!mongoose.isValidObjectId(id)) {
+        throw new ApiError(400, "Invalid payment id");
+    }
+
+    if (amount === undefined && paidOn === undefined && mode === undefined && note === undefined) {
+        throw new ApiError(400, "Provide at least one field to update");
+    }
+
+    let numericAmount;
+    if (amount !== undefined) {
+        numericAmount = Number(amount);
+        if (!numericAmount || numericAmount <= 0) {
+            throw new ApiError(400, "A positive payment amount is required");
+        }
+    }
+
+    let resolvedDate;
+    if (paidOn !== undefined) {
+        resolvedDate = new Date(paidOn);
+        if (Number.isNaN(resolvedDate.getTime())) {
+            throw new ApiError(400, "Invalid paidOn date");
+        }
+    }
+
+    if (mode !== undefined && !VALID_MODES.includes(mode)) {
+        throw new ApiError(400, `Invalid payment mode. Allowed: ${VALID_MODES.join(", ")}`);
+    }
+
+    const session = await mongoose.startSession();
+
+    try {
+        let updatedPayment;
+
+        await session.withTransaction(async () => {
+            const payment = await Payment.findById(id).session(session);
+            if (!payment) {
+                throw new ApiError(404, "Payment not found");
+            }
+
+            const sale = await Sale.findById(payment.sale).session(session);
+            if (!sale) {
+                throw new ApiError(404, "Sale for this payment not found");
+            }
+
+            if (numericAmount !== undefined && numericAmount !== payment.amount) {
+                const delta = numericAmount - payment.amount;
+
+                if (sale.amountPaid + delta > sale.billedAmount) {
+                    throw new ApiError(
+                        400,
+                        `Updated amount would exceed the billed amount of ${sale.billedAmount}`
+                    );
+                }
+                if (sale.amountPaid + delta < 0) {
+                    throw new ApiError(400, "Updated amount would make amountPaid negative");
+                }
+
+                sale.amountPaid += delta;
+                await sale.save({ session });
+
+                await Customer.findByIdAndUpdate(
+                    payment.customer,
+                    { $inc: { pendingBalance: -delta } },
+                    { session }
+                );
+
+                payment.amount = numericAmount;
+            }
+
+            if (resolvedDate !== undefined) payment.paidOn = resolvedDate;
+            if (mode !== undefined) payment.mode = mode;
+            if (note !== undefined) payment.note = note;
+
+            await payment.save({ session });
+            updatedPayment = payment;
+        });
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, updatedPayment, "Payment updated successfully"));
+    } finally {
+        session.endSession();
+    }
+});
+
 export {
     recordPayment,
     getPaymentsBySale,
     getPaymentsByCustomer,
     getAllPayments,
-    deletePayment
+    deletePayment,
+    updatePayment
 };
