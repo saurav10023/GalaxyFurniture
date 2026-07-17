@@ -19,6 +19,15 @@ const formatDimensions = (dimensions) => {
   return `${parts.join(" × ")}${unit ? ` ${unit}` : ""}`;
 };
 
+// category/brand can come back either as a plain string or as a populated
+// object ({ _id, name, fields, slug }) depending on the query — never render
+// the object directly, always pull its display name.
+const displayName = (field) => {
+  if (!field) return "";
+  if (typeof field === "string") return field;
+  return field.name || "";
+};
+
 const buildSpecChips = (p) => {
   const chips = [];
   if (p.material) chips.push(p.material);
@@ -219,8 +228,8 @@ const Hero = () => {
                   {current.name}
                 </p>
                 <p className="text-[11.5px] sm:text-[12px] text-[#F6F1E7]/50 mt-0.5 capitalize truncate">
-                  {current.brand}
-                  {current.category ? ` · ${current.category}` : ""}
+                  {displayName(current.brand)}
+                  {current.category ? ` · ${displayName(current.category)}` : ""}
                 </p>
                 {currentChips.length > 0 && (
                   <div className="hidden sm:flex flex-wrap gap-1 mt-2">

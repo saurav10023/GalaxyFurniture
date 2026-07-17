@@ -25,7 +25,13 @@ const COMPANY_LINKS = [
 
 const Footer = () => {
   return (
-    <footer className="bg-[#1A130E] text-[#F6F1E7] mt-20">
+    // NOTE: no top margin here on purpose — a margin sits outside the
+    // footer's own background, so it exposes whatever's behind the page
+    // (the default white body) as a visible gap between the page content
+    // and the footer. Bottom spacing for a page should come from the page
+    // itself (e.g. Hero's own pb-* classes), not from the footer reaching
+    // upward.
+    <footer className="bg-[#1A130E] text-[#F6F1E7]">
       {/* Brass hairline seam — same signature used under the Navbar, so the
           footer reads as the same piece rather than a bolted-on section. */}
       <div className="h-[2px] bg-gradient-to-r from-transparent via-[#C9A66B]/50 to-transparent" />

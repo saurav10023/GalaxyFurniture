@@ -9,6 +9,8 @@ import Home from './Home/Home.jsx'
 import AdminLogin from './pages/Login.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import AdminRoutes from './routes/AdminRoutes.jsx'
+import ProductView from './pages/ProductView.jsx'
+import Shop from './pages/Shop.jsx'
 
 const router = createBrowserRouter([
     {
@@ -18,6 +20,8 @@ const router = createBrowserRouter([
         { index: true, element: <Home/> },
         { path: "/login", element: <AdminLogin/> },
         { path: "/admin/*", element: <AdminRoutes/> },
+        {path:"/product/:id", element:<ProductView/>},
+        {path:"/shop" , element:<Shop/>}
       ]
     }
   ])
