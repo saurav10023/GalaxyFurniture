@@ -15,15 +15,37 @@ import {
 
 const MAX_IMAGES = 5;
 
+const inputClass =
+    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
+const labelClass = "mb-1 block text-sm font-medium text-slate-700";
+const smallLabelClass = "mb-1 block text-xs font-medium text-slate-500";
+
+function Toggle({ checked, onChange }) {
+    return (
+        <span className="relative inline-flex shrink-0 items-center">
+            <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+            <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
+            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+        </span>
+    );
+}
+
+function Section({ title, children }) {
+    return (
+        <fieldset className="rounded-xl border border-slate-200 p-4">
+            <legend className="px-1 text-sm font-semibold text-slate-700">{title}</legend>
+            <div className="mt-2 space-y-3">{children}</div>
+        </fieldset>
+    );
+}
+
 // Same input-per-type switch as ProductCreateForm's AttributeInput,
 // duplicated here since the original isn't exported.
 function AttributeInput({ field, value, onChange }) {
-    const common = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
-
     switch (field.type) {
         case "textarea":
             return (
-                <textarea value={value ?? ""} onChange={(e) => onChange(e.target.value)} rows={2} className={common} />
+                <textarea value={value ?? ""} onChange={(e) => onChange(e.target.value)} rows={2} className={inputClass} />
             );
         case "number":
         case "decimal":
@@ -35,37 +57,32 @@ function AttributeInput({ field, value, onChange }) {
                     onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
                     min={field.validation?.min}
                     max={field.validation?.max}
-                    className={common}
+                    className={inputClass}
                 />
             );
         case "boolean":
             return (
-                <label className="flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(value)}
-                        onChange={(e) => onChange(e.target.checked)}
-                        className="rounded border-slate-300"
-                    />
+                <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                    <Toggle checked={Boolean(value)} onChange={onChange} />
                     Yes
                 </label>
             );
         case "date":
-            return <input type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass} />;
         case "url":
-            return <input type="url" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="url" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass} />;
         case "color":
             return (
                 <input
                     type="color"
                     value={value || "#000000"}
                     onChange={(e) => onChange(e.target.value)}
-                    className="h-9 w-16 rounded-md border border-slate-300"
+                    className="h-10 w-16 cursor-pointer rounded-lg border border-slate-300"
                 />
             );
         case "select":
             return (
-                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common}>
+                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass}>
                     <option value="" disabled>
                         Select…
                     </option>
@@ -87,10 +104,10 @@ function AttributeInput({ field, value, onChange }) {
                             type="button"
                             key={opt}
                             onClick={() => toggle(opt)}
-                            className={`rounded-full border px-3 py-1 text-xs ${
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                                 selected.includes(opt)
                                     ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                    : "border-slate-300 text-slate-600"
+                                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
                             }`}
                         >
                             {opt}
@@ -101,7 +118,7 @@ function AttributeInput({ field, value, onChange }) {
         }
         case "text":
         default:
-            return <input type="text" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={common} />;
+            return <input type="text" value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass} />;
     }
 }
 
@@ -314,369 +331,384 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/30" onClick={submitting ? undefined : onClose} />
-            <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-xl">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-                    <div>
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={submitting ? undefined : onClose} />
+
+            <div className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:max-w-2xl sm:rounded-2xl">
+                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                    <div className="min-w-0">
                         <h2 className="text-base font-semibold text-slate-900">Edit product</h2>
-                        {categoryName && <p className="text-xs text-slate-400 mt-0.5">Category: {categoryName}</p>}
+                        {categoryName && <p className="mt-0.5 truncate text-xs text-slate-400">Category: {categoryName}</p>}
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={submitting}
-                        className="text-slate-400 hover:text-slate-600 text-xl leading-none disabled:opacity-40"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-40"
+                        aria-label="Close"
                     >
-                        ×
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
                     </button>
                 </div>
 
-                {loading ? (
-                    <p className="text-sm text-slate-400 py-16 text-center">Loading product…</p>
-                ) : loadError ? (
-                    <p className="text-sm text-red-600 py-16 text-center">{loadError}</p>
-                ) : (
-                    <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                        {error && (
-                            <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Product name</label>
-                                <input
-                                    type="text"
-                                    value={form.name}
-                                    onChange={(e) => set("name", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    Category <span className="text-slate-400 font-normal">(locked)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={categoryName}
-                                    disabled
-                                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500"
-                                />
-                            </div>
+                <div className="overflow-y-auto">
+                    {loading ? (
+                        <div className="flex flex-col items-center gap-3 py-20">
+                            <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 animate-spin text-indigo-500">
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                                <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                            </svg>
+                            <p className="text-sm text-slate-400">Loading product…</p>
                         </div>
+                    ) : loadError ? (
+                        <p className="py-20 text-center text-sm text-red-600">{loadError}</p>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
+                            {error && (
+                                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                    {error}
+                                </div>
+                            )}
 
-                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className={labelClass}>Product name</label>
+                                    <input
+                                        type="text"
+                                        value={form.name}
+                                        onChange={(e) => set("name", e.target.value)}
+                                        className={inputClass}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>
+                                        Category <span className="font-normal text-slate-400">(locked)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={categoryName}
+                                        disabled
+                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className={labelClass}>Brand</label>
+                                    <input
+                                        type="text"
+                                        value={form.brand}
+                                        onChange={(e) => set("brand", e.target.value)}
+                                        className={inputClass}
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Supplier</label>
+                                    <input
+                                        type="text"
+                                        value={form.supplier}
+                                        onChange={(e) => set("supplier", e.target.value)}
+                                        className={inputClass}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Brand</label>
-                                <input
-                                    type="text"
-                                    value={form.brand}
-                                    onChange={(e) => set("brand", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                                <label className={labelClass}>Description</label>
+                                <textarea
+                                    value={form.description}
+                                    onChange={(e) => set("description", e.target.value)}
+                                    rows={3}
+                                    className={`${inputClass} resize-none`}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
-                                <input
-                                    type="text"
-                                    value={form.supplier}
-                                    onChange={(e) => set("supplier", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                            <textarea
-                                value={form.description}
-                                onChange={(e) => set("description", e.target.value)}
-                                rows={3}
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Material</label>
-                                <input
-                                    type="text"
-                                    value={form.material}
-                                    onChange={(e) => set("material", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                                />
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className={labelClass}>Material</label>
+                                    <input
+                                        type="text"
+                                        value={form.material}
+                                        onChange={(e) => set("material", e.target.value)}
+                                        className={inputClass}
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Color</label>
+                                    <input
+                                        type="text"
+                                        value={form.color}
+                                        onChange={(e) => set("color", e.target.value)}
+                                        className={inputClass}
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Color</label>
-                                <input
-                                    type="text"
-                                    value={form.color}
-                                    onChange={(e) => set("color", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                                />
-                            </div>
-                        </div>
 
-                        <fieldset className="rounded-lg border border-slate-200 p-4">
-                            <legend className="px-1 text-sm font-medium text-slate-700">Dimensions</legend>
-                            <div className="grid grid-cols-4 gap-3">
-                                {["length", "width", "height"].map((dim) => (
-                                    <div key={dim}>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1 capitalize">
-                                            {dim}
-                                        </label>
+                            <Section title="Dimensions">
+                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    {["length", "width", "height"].map((dim) => (
+                                        <div key={dim}>
+                                            <label className={`${smallLabelClass} capitalize`}>{dim}</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={form.dimensions[dim]}
+                                                onChange={(e) => set(`dimensions.${dim}`, e.target.value)}
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    ))}
+                                    <div>
+                                        <label className={smallLabelClass}>Unit</label>
+                                        <select
+                                            value={form.dimensions.unit}
+                                            onChange={(e) => set("dimensions.unit", e.target.value)}
+                                            className={inputClass}
+                                        >
+                                            <option value="cm">cm</option>
+                                            <option value="inch">inch</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </Section>
+
+                            <Section title="Pricing">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label className={smallLabelClass}>Purchase price</label>
                                         <input
                                             type="number"
                                             min="0"
-                                            value={form.dimensions[dim]}
-                                            onChange={(e) => set(`dimensions.${dim}`, e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            value={form.pricing.purchasePrice}
+                                            onChange={(e) => set("pricing.purchasePrice", e.target.value)}
+                                            className={inputClass}
+                                            required
                                         />
                                     </div>
-                                ))}
+                                    <div>
+                                        <label className={smallLabelClass}>Selling price</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={form.pricing.sellingPrice}
+                                            onChange={(e) => set("pricing.sellingPrice", e.target.value)}
+                                            className={inputClass}
+                                            required
+                                        />
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">Unit</label>
+                                    <label className={smallLabelClass}>Price display</label>
                                     <select
-                                        value={form.dimensions.unit}
-                                        onChange={(e) => set("dimensions.unit", e.target.value)}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                        value={form.pricing.displayMode}
+                                        onChange={(e) => set("pricing.displayMode", e.target.value)}
+                                        className={inputClass}
                                     >
-                                        <option value="cm">cm</option>
-                                        <option value="inch">inch</option>
+                                        <option value="show_price">Show price</option>
+                                        <option value="contact_for_price">Contact for price</option>
+                                        <option value="starting_from">Starting from price</option>
                                     </select>
                                 </div>
-                            </div>
-                        </fieldset>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                                        <Toggle
+                                            checked={form.pricing.negotiation.enabled}
+                                            onChange={(v) => set("pricing.negotiation.enabled", v)}
+                                        />
+                                        Allow price negotiation
+                                    </label>
+                                    {form.pricing.negotiation.enabled && (
+                                        <div>
+                                            <label className={smallLabelClass}>Minimum acceptable price</label>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={form.pricing.negotiation.minimumPrice}
+                                                onChange={(e) => set("pricing.negotiation.minimumPrice", e.target.value)}
+                                                className={inputClass}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </Section>
 
-                        <fieldset className="rounded-lg border border-slate-200 p-4">
-                            <legend className="px-1 text-sm font-medium text-slate-700">Pricing</legend>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">Purchase price</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={form.pricing.purchasePrice}
-                                        onChange={(e) => set("pricing.purchasePrice", e.target.value)}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">Selling price</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={form.pricing.sellingPrice}
-                                        onChange={(e) => set("pricing.sellingPrice", e.target.value)}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="mt-3">
-                                <label className="block text-xs font-medium text-slate-500 mb-1">Price display</label>
-                                <select
-                                    value={form.pricing.displayMode}
-                                    onChange={(e) => set("pricing.displayMode", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                                >
-                                    <option value="show_price">Show price</option>
-                                    <option value="contact_for_price">Contact for price</option>
-                                    <option value="starting_from">Starting from price</option>
-                                </select>
-                            </div>
-                            <div className="mt-3 space-y-2">
-                                <label className="flex items-center gap-2 text-sm text-slate-600">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.pricing.negotiation.enabled}
-                                        onChange={(e) => set("pricing.negotiation.enabled", e.target.checked)}
-                                        className="rounded border-slate-300"
-                                    />
-                                    Allow price negotiation
-                                </label>
-                                {form.pricing.negotiation.enabled && (
+                            <Section title="Stock">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
-                                            Minimum acceptable price
-                                        </label>
+                                        <label className={smallLabelClass}>Current stock</label>
                                         <input
                                             type="number"
                                             min="0"
-                                            value={form.pricing.negotiation.minimumPrice}
-                                            onChange={(e) => set("pricing.negotiation.minimumPrice", e.target.value)}
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            value={form.stock.current}
+                                            onChange={(e) => set("stock.current", e.target.value)}
+                                            className={inputClass}
                                         />
                                     </div>
-                                )}
-                            </div>
-                        </fieldset>
-
-                        <fieldset className="rounded-lg border border-slate-200 p-4">
-                            <legend className="px-1 text-sm font-medium text-slate-700">Stock</legend>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">Current stock</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={form.stock.current}
-                                        onChange={(e) => set("stock.current", e.target.value)}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                                    />
+                                    <div>
+                                        <label className={smallLabelClass}>Low stock threshold</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={form.stock.lowStockThreshold}
+                                            onChange={(e) => set("stock.lowStockThreshold", e.target.value)}
+                                            className={inputClass}
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">Low stock threshold</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={form.stock.lowStockThreshold}
-                                        onChange={(e) => set("stock.lowStockThreshold", e.target.value)}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
-                                    />
-                                </div>
-                            </div>
-                        </fieldset>
+                            </Section>
 
-                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">When out of stock</label>
+                                <label className={labelClass}>When out of stock</label>
                                 <select
                                     value={form.outOfStockAction}
                                     onChange={(e) => set("outOfStockAction", e.target.value)}
-                                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                                    className={inputClass}
                                 >
                                     <option value="show_as_out_of_stock">Show as "Out of Stock"</option>
                                     <option value="hide">Hide from customers</option>
                                 </select>
                             </div>
-                        </div>
 
-                        <div className="flex gap-6">
-                            <label className="flex items-center gap-2 text-sm text-slate-600">
-                                <input
-                                    type="checkbox"
-                                    checked={form.isFeatured}
-                                    onChange={(e) => set("isFeatured", e.target.checked)}
-                                    className="rounded border-slate-300"
-                                />
-                                Featured product
-                            </label>
-                            <label className="flex items-center gap-2 text-sm text-slate-600">
-                                <input
-                                    type="checkbox"
-                                    checked={form.isNewArrival}
-                                    onChange={(e) => set("isNewArrival", e.target.checked)}
-                                    className="rounded border-slate-300"
-                                />
-                                New arrival
-                            </label>
-                        </div>
+                            <div className="flex flex-col gap-3 sm:flex-row">
+                                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700">
+                                    <Toggle checked={form.isFeatured} onChange={(v) => set("isFeatured", v)} />
+                                    Featured product
+                                </label>
+                                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700">
+                                    <Toggle checked={form.isNewArrival} onChange={(v) => set("isNewArrival", v)} />
+                                    New arrival
+                                </label>
+                            </div>
 
-                        {categoryFields.length > 0 && (
-                            <fieldset className="rounded-lg border border-slate-200 p-4 space-y-3">
-                                <legend className="px-1 text-sm font-medium text-slate-700">
-                                    Category-specific details
-                                </legend>
-                                {categoryFields.map((field) => (
-                                    <div key={field.key}>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
-                                            {field.name}
-                                            {field.required && <span className="text-red-500"> *</span>}
-                                        </label>
-                                        <AttributeInput
-                                            field={field}
-                                            value={attributes[field.key]}
-                                            onChange={(value) => setAttributes((prev) => ({ ...prev, [field.key]: value }))}
-                                        />
+                            {categoryFields.length > 0 && (
+                                <Section title="Category-specific details">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        {categoryFields.map((field) => (
+                                            <div key={field.key}>
+                                                <label className={smallLabelClass}>
+                                                    {field.name}
+                                                    {field.required && <span className="text-red-500"> *</span>}
+                                                </label>
+                                                <AttributeInput
+                                                    field={field}
+                                                    value={attributes[field.key]}
+                                                    onChange={(value) => setAttributes((prev) => ({ ...prev, [field.key]: value }))}
+                                                />
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </fieldset>
-                        )}
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                Images <span className="text-slate-400 font-normal">({totalImageCount}/{MAX_IMAGES})</span>
-                            </label>
-
-                            {existingImages.length > 0 && (
-                                <div className="flex flex-wrap gap-3 mb-3">
-                                    {existingImages.map((img) => (
-                                        <div key={img.publicId} className="relative">
-                                            <img
-                                                src={img.url}
-                                                alt=""
-                                                className="h-16 w-16 rounded-md object-cover border border-slate-200"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeExistingImage(img)}
-                                                disabled={removingImageId === img.publicId}
-                                                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-slate-700 text-white text-xs leading-5 disabled:opacity-50"
-                                                aria-label="Remove image"
-                                            >
-                                                {removingImageId === img.publicId ? "…" : "×"}
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
+                                </Section>
                             )}
 
-                            <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleImageSelect}
-                                disabled={totalImageCount >= MAX_IMAGES}
-                                className="text-sm"
-                            />
-                            {newImages.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-3">
-                                    {newImages.map((file, i) => (
-                                        <div key={i} className="relative">
-                                            <img
-                                                src={URL.createObjectURL(file)}
-                                                alt={file.name}
-                                                className="h-16 w-16 rounded-md object-cover border border-slate-200"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeNewImage(i)}
-                                                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-slate-700 text-white text-xs leading-5"
-                                                aria-label={`Remove ${file.name}`}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                            <div>
+                                <label className={labelClass}>
+                                    Images <span className="font-normal text-slate-400">({totalImageCount}/{MAX_IMAGES})</span>
+                                </label>
 
-                        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                disabled={submitting}
-                                className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-                            >
-                                {submitting ? "Saving…" : "Save changes"}
-                            </button>
-                        </div>
-                    </form>
-                )}
+                                {existingImages.length > 0 && (
+                                    <div className="mb-3 flex flex-wrap gap-3">
+                                        {existingImages.map((img) => (
+                                            <div key={img.publicId} className="relative">
+                                                <img
+                                                    src={img.url}
+                                                    alt=""
+                                                    className="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeExistingImage(img)}
+                                                    disabled={removingImageId === img.publicId}
+                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs leading-none text-white shadow disabled:opacity-50"
+                                                    aria-label="Remove image"
+                                                >
+                                                    {removingImageId === img.publicId ? "…" : "×"}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <label
+                                    className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 text-center text-sm transition ${
+                                        totalImageCount >= MAX_IMAGES
+                                            ? "cursor-not-allowed border-slate-100 text-slate-300"
+                                            : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                                    }`}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+                                        <path
+                                            d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                    Add images
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleImageSelect}
+                                        disabled={totalImageCount >= MAX_IMAGES}
+                                        className="hidden"
+                                    />
+                                </label>
+
+                                {newImages.length > 0 && (
+                                    <div className="mt-3 flex flex-wrap gap-3">
+                                        {newImages.map((file, i) => (
+                                            <div key={i} className="relative">
+                                                <img
+                                                    src={URL.createObjectURL(file)}
+                                                    alt={file.name}
+                                                    className="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeNewImage(i)}
+                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs leading-none text-white shadow"
+                                                    aria-label={`Remove ${file.name}`}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="sticky bottom-0 -mx-5 flex flex-col-reverse gap-2 border-t border-slate-100 bg-white/95 px-5 py-4 backdrop-blur-sm sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    disabled={submitting}
+                                    className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                                >
+                                    {submitting && (
+                                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                                            <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                        </svg>
+                                    )}
+                                    {submitting ? "Saving…" : "Save changes"}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                </div>
             </div>
         </div>
     );

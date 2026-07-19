@@ -7,6 +7,22 @@
 import { useEffect, useState } from "react";
 import { getAllCategories } from "../../../api/admin/categories.api";
 
+function CategorySkeleton() {
+    return (
+        <div className="space-y-2 animate-pulse">
+            {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3.5">
+                    <div className="space-y-2">
+                        <div className="h-3.5 w-32 rounded bg-slate-200" />
+                        <div className="h-3 w-48 rounded bg-slate-100" />
+                    </div>
+                    <div className="h-3 w-10 rounded bg-slate-100" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export default function CategoryManagementBoard({ refreshKey, onEditCategory }) {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,42 +50,68 @@ export default function CategoryManagementBoard({ refreshKey, onEditCategory }) 
         };
     }, [refreshKey]);
 
-    if (loading) return <p className="text-sm text-slate-400 py-6 text-center">Loading categories…</p>;
-    if (error) return <p className="text-sm text-red-600 py-6 text-center">{error}</p>;
-    if (categories.length === 0) return <p className="text-sm text-slate-400 py-6 text-center">No categories yet.</p>;
+    if (loading) return <CategorySkeleton />;
+
+    if (error) {
+        return (
+            <div className="rounded-xl border border-red-100 bg-red-50/60 px-4 py-6 text-center text-sm text-red-700">
+                {error}
+            </div>
+        );
+    }
+
+    if (categories.length === 0) {
+        return (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center">
+                <p className="text-sm font-medium text-slate-600">No categories yet</p>
+                <p className="mt-1 text-xs text-slate-400">Create one using the form to start organizing products.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-2">
-            {categories.map((category) => (
-                <div key={category._id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium text-slate-800 truncate">{category.name}</p>
-                            {category.isFeatured && (
-                                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600">
-                                    Featured
-                                </span>
-                            )}
-                            {!category.isActive && (
-                                <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                                    Deactivated
-                                </span>
-                            )}
-                        </div>
-                        {category.description && <p className="text-xs text-slate-400 truncate">{category.description}</p>}
-                        <p className="text-xs text-slate-400 mt-0.5">
-                            {(category.fields || []).length} custom field{(category.fields || []).length === 1 ? "" : "s"}
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => onEditCategory(category)}
-                        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 shrink-0 ml-3"
+            {categories.map((category) => {
+                const fieldCount = (category.fields || []).length;
+                return (
+                    <div
+                        key={category._id}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 transition hover:border-slate-300 hover:shadow-sm"
                     >
-                        Edit
-                    </button>
-                </div>
-            ))}
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                <p className="truncate text-sm font-medium text-slate-800">{category.name}</p>
+                                {category.isFeatured && (
+                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                                        Featured
+                                    </span>
+                                )}
+                                {!category.isActive && (
+                                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                        Deactivated
+                                    </span>
+                                )}
+                            </div>
+                            {category.description && (
+                                <p className="mt-0.5 truncate text-xs text-slate-400">{category.description}</p>
+                            )}
+                            <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3">
+                                    <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                </svg>
+                                {fieldCount} custom field{fieldCount === 1 ? "" : "s"}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => onEditCategory(category)}
+                            className="shrink-0 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition hover:bg-indigo-100"
+                        >
+                            Edit
+                        </button>
+                    </div>
+                );
+            })}
         </div>
     );
 }

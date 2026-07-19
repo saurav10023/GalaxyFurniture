@@ -6,6 +6,7 @@ import CategoryProductsBoard from "../../components/admin/products/CategoryProdu
 import CategoryManagementBoard from "../../components/admin/products/CategoryManagementBoard";
 import ProductEditModal from "../../components/admin/products/ProductEditModal";
 import CategoryEditModal from "../../components/admin/products/CategoryEditModal";
+import { IconProducts } from "../../components/admin/icons/AdminIcons";
 
 const TABS = [
     { key: "product", label: "New product" },
@@ -36,22 +37,27 @@ export default function ProductManagement() {
     };
 
     return (
-        <div className="space-y-8 p-6">
-            <div>
-                <h1 className="text-xl font-semibold text-slate-900">Products</h1>
-                <p className="text-sm text-slate-500 mt-0.5">
-                    Create products and categories, and manage your existing catalog.
-                </p>
+        <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8">
+            <div className="flex items-center gap-3">
+                <div className="hidden sm:flex h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 items-center justify-center shrink-0">
+                    <IconProducts className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Products</h1>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        Create products and categories, and manage your existing catalog.
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <div className="flex gap-1 border-b border-slate-200 mb-4">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                <div className="flex gap-1 border-b border-slate-200 mb-4 -mt-1 overflow-x-auto">
                     {TABS.map((tab) => (
                         <button
                             key={tab.key}
                             type="button"
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+                            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
                                 activeTab === tab.key
                                     ? "border-indigo-600 text-indigo-700"
                                     : "border-transparent text-slate-500 hover:text-slate-700"

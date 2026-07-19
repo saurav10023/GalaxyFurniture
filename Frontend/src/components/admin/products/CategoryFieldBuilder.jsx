@@ -44,6 +44,9 @@ const emptyField = () => ({
     _keyEditedManually: false
 });
 
+const inputClass =
+    "w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50";
+
 export default function CategoryFieldBuilder({ fields, onChange }) {
     const [optionsDraft, setOptionsDraft] = useState({}); // per-field raw options text while typing
 
@@ -100,22 +103,30 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-slate-700">Custom fields for this category</h3>
+            <div className="flex items-center justify-between gap-3">
+                <div>
+                    <h3 className="text-sm font-medium text-slate-700">Custom fields for this category</h3>
+                    <p className="text-xs text-slate-400">Shown on every product created under this category.</p>
+                </div>
                 <button
                     type="button"
                     onClick={addField}
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-100"
                 >
-                    + Add field
+                    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+                        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Add field
                 </button>
             </div>
 
             {fields.length === 0 && (
-                <p className="text-sm text-slate-400 italic">
-                    No custom fields yet. Products in this category will only have the standard fields
-                    (material, color, dimensions, etc).
-                </p>
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-6 text-center">
+                    <p className="text-sm text-slate-400">
+                        No custom fields yet. Products in this category will only have the standard fields
+                        (material, color, dimensions, etc).
+                    </p>
+                </div>
             )}
 
             <div className="space-y-3">
@@ -126,12 +137,12 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                     return (
                         <div
                             key={index}
-                            className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3"
+                            className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4"
                         >
-                            <div className="flex items-start gap-3">
-                                <div className="flex-1 grid grid-cols-2 gap-3">
+                            <div className="flex items-start gap-2 sm:gap-3">
+                                <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Field label
                                         </label>
                                         <input
@@ -139,11 +150,11 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                             value={field.name}
                                             onChange={(e) => handleNameChange(index, e.target.value)}
                                             placeholder="e.g. Seating Capacity"
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            className={inputClass}
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Key (stored on product)
                                         </label>
                                         <input
@@ -151,57 +162,61 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                             value={field.key}
                                             onChange={(e) => handleKeyChange(index, e.target.value)}
                                             placeholder="seating_capacity"
-                                            className={`w-full rounded-md border px-3 py-1.5 text-sm font-mono ${
-                                                keyDuplicate ? "border-red-400" : "border-slate-300"
+                                            className={`${inputClass} font-mono ${
+                                                keyDuplicate ? "border-red-400 focus:border-red-400 focus:ring-red-50" : ""
                                             }`}
                                         />
                                         {keyDuplicate && (
-                                            <p className="text-xs text-red-500 mt-1">
+                                            <p className="mt-1 text-xs text-red-500">
                                                 Duplicate key — each field needs a unique key.
                                             </p>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-1 pt-5">
+                                <div className="flex shrink-0 flex-col items-center gap-0.5 pt-5">
                                     <button
                                         type="button"
                                         onClick={() => moveField(index, -1)}
                                         disabled={index === 0}
-                                        className="text-xs text-slate-400 hover:text-slate-600 disabled:opacity-30"
+                                        className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition hover:bg-slate-200 hover:text-slate-600 disabled:opacity-25 disabled:hover:bg-transparent"
                                         aria-label="Move field up"
                                     >
-                                        ▲
+                                        <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+                                            <path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => moveField(index, 1)}
                                         disabled={index === fields.length - 1}
-                                        className="text-xs text-slate-400 hover:text-slate-600 disabled:opacity-30"
+                                        className="flex h-6 w-6 items-center justify-center rounded text-slate-400 transition hover:bg-slate-200 hover:text-slate-600 disabled:opacity-25 disabled:hover:bg-transparent"
                                         aria-label="Move field down"
                                     >
-                                        ▼
+                                        <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+                                            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
                                     </button>
                                 </div>
 
                                 <button
                                     type="button"
                                     onClick={() => removeField(index)}
-                                    className="pt-5 text-sm text-red-500 hover:text-red-600"
+                                    className="shrink-0 self-start pt-5 text-xs font-medium text-red-500 transition hover:text-red-600"
                                 >
                                     Remove
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                                    <label className="mb-1 block text-xs font-medium text-slate-500">
                                         Field type
                                     </label>
                                     <select
                                         value={field.type}
                                         onChange={(e) => updateField(index, { type: e.target.value, options: [] })}
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                        className={inputClass}
                                     >
                                         {FIELD_TYPES.map((t) => (
                                             <option key={t.value} value={t.value}>
@@ -211,22 +226,20 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                     </select>
                                 </div>
 
-                                <div className="flex items-end pb-1.5">
-                                    <label className="flex items-center gap-2 text-sm text-slate-600">
-                                        <input
-                                            type="checkbox"
-                                            checked={field.required}
-                                            onChange={(e) => updateField(index, { required: e.target.checked })}
-                                            className="rounded border-slate-300"
-                                        />
-                                        Required
-                                    </label>
-                                </div>
+                                <label className="flex items-center gap-2 self-end pb-1.5 text-sm text-slate-600">
+                                    <input
+                                        type="checkbox"
+                                        checked={field.required}
+                                        onChange={(e) => updateField(index, { required: e.target.checked })}
+                                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    Required
+                                </label>
                             </div>
 
                             {NEEDS_OPTIONS.includes(field.type) && (
                                 <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                                    <label className="mb-1 block text-xs font-medium text-slate-500">
                                         Options (comma-separated)
                                     </label>
                                     <input
@@ -234,12 +247,23 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                         value={optionsDraft[index] ?? field.options.join(", ")}
                                         onChange={(e) => handleOptionsChange(index, e.target.value)}
                                         placeholder="Small, Medium, Large"
-                                        className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                        className={inputClass}
                                     />
-                                    {field.options.length === 0 && (
-                                        <p className="text-xs text-amber-600 mt-1">
+                                    {field.options.length === 0 ? (
+                                        <p className="mt-1 text-xs text-amber-600">
                                             At least one option is required for this field type.
                                         </p>
+                                    ) : (
+                                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                            {field.options.map((opt) => (
+                                                <span
+                                                    key={opt}
+                                                    className="rounded-full bg-white px-2 py-0.5 text-xs text-slate-600 ring-1 ring-slate-200"
+                                                >
+                                                    {opt}
+                                                </span>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -247,7 +271,7 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                             {HAS_RANGE_VALIDATION.includes(field.type) && (
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Min value
                                         </label>
                                         <input
@@ -258,11 +282,11 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                                     min: e.target.value === "" ? undefined : Number(e.target.value)
                                                 })
                                             }
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            className={inputClass}
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Max value
                                         </label>
                                         <input
@@ -273,7 +297,7 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                                     max: e.target.value === "" ? undefined : Number(e.target.value)
                                                 })
                                             }
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            className={inputClass}
                                         />
                                     </div>
                                 </div>
@@ -282,7 +306,7 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                             {HAS_LENGTH_VALIDATION.includes(field.type) && (
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Min length
                                         </label>
                                         <input
@@ -294,11 +318,11 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                                         e.target.value === "" ? undefined : Number(e.target.value)
                                                 })
                                             }
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            className={inputClass}
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <label className="mb-1 block text-xs font-medium text-slate-500">
                                             Max length
                                         </label>
                                         <input
@@ -310,7 +334,7 @@ export default function CategoryFieldBuilder({ fields, onChange }) {
                                                         e.target.value === "" ? undefined : Number(e.target.value)
                                                 })
                                             }
-                                            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+                                            className={inputClass}
                                         />
                                     </div>
                                 </div>

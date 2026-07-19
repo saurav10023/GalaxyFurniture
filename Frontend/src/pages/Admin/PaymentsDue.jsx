@@ -8,9 +8,9 @@ export default function PaymentsDue() {
     const [refreshKey, setRefreshKey] = useState(0);
 
     return (
-        <div className="space-y-8 p-6">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
             <div>
-                <h1 className="text-xl font-semibold text-slate-900">Payments Due</h1>
+                <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Payments Due</h1>
                 <p className="text-sm text-slate-500 mt-0.5">
                     Customers who still owe money on a sale.
                 </p>

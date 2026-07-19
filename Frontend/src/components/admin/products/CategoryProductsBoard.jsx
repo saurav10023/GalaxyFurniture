@@ -128,7 +128,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
     return (
         <div className="space-y-6">
             {/* Toolbar */}
-            <div className="sticky top-0 z-10 -mx-4 space-y-4 border-b border-slate-200/70 bg-white/80 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border sm:px-5">
+            <div className="sticky top-0 z-10 -mx-4 space-y-4 border-b border-slate-200/70 bg-white/85 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border sm:px-5 sm:shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="text-lg font-semibold tracking-tight text-slate-900">Products by category</h2>
@@ -203,7 +203,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
             ) : (
                 sections.map(({ category, items }) => (
                     <section key={category._id}>
-                        <div className="mb-3 flex items-baseline gap-2">
+                        <div className="mb-3 flex flex-wrap items-baseline gap-2">
                             <h3 className="text-sm font-semibold text-slate-700">{category.name}</h3>
                             <span className="text-xs text-slate-400">
                                 {items.length} product{items.length === 1 ? "" : "s"}
@@ -214,7 +214,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                                 </span>
                             )}
                         </div>
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                             {items.map((product) => (
                                 <ProductCard
                                     key={product._id}
@@ -238,7 +238,7 @@ function SkeletonBoard() {
             {[0, 1].map((section) => (
                 <div key={section}>
                     <div className="mb-3 h-4 w-32 rounded bg-slate-200" />
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                         {Array.from({ length: 5 }).map((_, i) => (
                             <div key={i} className="space-y-2 rounded-xl border border-slate-100 p-2">
                                 <div className="aspect-square w-full rounded-lg bg-slate-200" />

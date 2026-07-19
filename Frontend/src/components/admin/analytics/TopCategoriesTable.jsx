@@ -37,8 +37,8 @@ export default function TopCategoriesTable({ dateFrom, dateTo, limit = 10 }) {
     const maxRevenue = rows.reduce((max, row) => Math.max(max, row.revenue), 0);
 
     return (
-        <div className="rounded-lg border border-slate-200 bg-white">
-            <div className="px-5 py-4 border-b border-slate-100">
+        <div className="rounded-xl border border-slate-200 bg-white">
+            <div className="px-4 sm:px-5 py-4 border-b border-slate-100">
                 <h2 className="text-sm font-semibold text-slate-900">Top categories</h2>
                 <p className="text-xs text-slate-500 mt-0.5">Ranked by revenue.</p>
             </div>
@@ -54,10 +54,10 @@ export default function TopCategoriesTable({ dateFrom, dateTo, limit = 10 }) {
             ) : (
                 <div className="divide-y divide-slate-100">
                     {rows.map((row) => (
-                        <div key={row.categoryId} className="px-5 py-3">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="font-medium text-slate-900">{row.categoryName}</span>
-                                <span className="text-slate-600">{money(row.revenue)}</span>
+                        <div key={row.categoryId} className="px-4 sm:px-5 py-3">
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                                <span className="font-medium text-slate-900 truncate">{row.categoryName}</span>
+                                <span className="text-slate-600 shrink-0">{money(row.revenue)}</span>
                             </div>
                             <div className="flex items-center gap-2 mt-1.5">
                                 <div className="h-1.5 flex-1 rounded-full bg-slate-100 overflow-hidden">

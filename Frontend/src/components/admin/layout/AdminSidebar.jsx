@@ -1,76 +1,93 @@
 // src/components/admin/layout/AdminSidebar.jsx
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import {
+    IconOverview,
+    IconProducts,
+    IconSellOut,
+    IconAnalytics,
+    IconSalesHistory,
+    IconPaymentsDue,
+    IconPaymentHistory,
+    IconClose
+} from "../icons/AdminIcons";
 
 const NAV_ITEMS = [
-    { to: "/admin", label: "Overview", end: true },
-    { to: "/admin/products", label: "Products" },
-    { to: "/admin/sell-out", label: "Sell Out" },
-    { to: "/admin/analytics", label: "Analytics" },
-    { to: "/admin/sales/history", label: "Sales History" },
-    { to: "/admin/payments", label: "Payment Dues" },
-    { to: "/admin/payments/history", label: "Payment History" } 
+    { to: "/admin", label: "Overview", end: true, Icon: IconOverview },
+    { to: "/admin/products", label: "Products", Icon: IconProducts },
+    { to: "/admin/sell-out", label: "Sell Out", Icon: IconSellOut },
+    { to: "/admin/analytics", label: "Analytics", Icon: IconAnalytics },
+    { to: "/admin/sales/history", label: "Sales History", Icon: IconSalesHistory },
+    { to: "/admin/payments", label: "Payment Dues", Icon: IconPaymentsDue },
+    { to: "/admin/payments/history", label: "Payment History", Icon: IconPaymentHistory }
 ];
 
-const linkClasses = ({ isActive }) =>
-    `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-        isActive
-            ? "bg-indigo-50 text-indigo-700"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-    }`;
-
-export default function AdminSidebar() {
-    const [open, setOpen] = useState(false);
-
+export default function AdminSidebar({ open = false, onClose = () => {} }) {
     return (
         <>
-            {/* Mobile toggle */}
-            <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="md:hidden fixed top-3 left-3 z-30 rounded-md border border-slate-200 bg-white p-2 text-slate-600 shadow-sm"
-                aria-label="Open navigation"
-            >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
-                </svg>
-            </button>
-
             {/* Mobile overlay */}
             {open && (
-                <div className="md:hidden fixed inset-0 z-30 bg-black/20" onClick={() => setOpen(false)} />
+                <div
+                    className="md:hidden fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-[1px] transition-opacity"
+                    onClick={onClose}
+                    aria-hidden="true"
+                />
             )}
 
             <aside
-                className={`fixed md:static inset-y-0 left-0 z-40 w-60 bg-white border-r border-slate-200 flex flex-col
-                    transform transition-transform md:transform-none
+                className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 flex flex-col
+                    transform transition-transform duration-200 ease-out md:transform-none
                     ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
             >
-                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-900">Admin</span>
+                <div className="h-14 px-5 flex items-center justify-between border-b border-slate-100 shrink-0">
+                    <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-md bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                            A
+                        </div>
+                        <span className="text-sm font-semibold text-slate-900">Admin Panel</span>
+                    </div>
                     <button
                         type="button"
-                        onClick={() => setOpen(false)}
-                        className="md:hidden text-slate-400 hover:text-slate-600 text-xl leading-none"
+                        onClick={onClose}
+                        className="md:hidden text-slate-400 hover:text-slate-600 p-1 -mr-1 rounded"
                         aria-label="Close navigation"
                     >
-                        ×
+                        <IconClose className="h-5 w-5" />
                     </button>
                 </div>
 
-                <nav className="flex-1 px-3 py-4 space-y-1">
-                    {NAV_ITEMS.map((item) => (
+                <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+                    {NAV_ITEMS.map(({ to, label, end, Icon }) => (
                         <NavLink
-                            key={item.to}
-                            to={item.to}
-                            end={item.end}
-                            className={linkClasses}
-                            onClick={() => setOpen(false)}
+                            key={to}
+                            to={to}
+                            end={end}
+                            onClick={onClose}
+                            className={({ isActive }) =>
+                                `group relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors
+                                ${isActive ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`
+                            }
                         >
-                            {item.label}
+                            {({ isActive }) => (
+                                <>
+                                    <span
+                                        className={`absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full transition-colors
+                                        ${isActive ? "bg-indigo-600" : "bg-transparent"}`}
+                                    />
+                                    <Icon
+                                        className={`h-[18px] w-[18px] shrink-0 ${
+                                            isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-500"
+                                        }`}
+                                    />
+                                    <span className="truncate">{label}</span>
+                                </>
+                            )}
                         </NavLink>
                     ))}
                 </nav>
+
+                <div className="px-5 py-3 border-t border-slate-100 shrink-0">
+                    <p className="text-[11px] text-slate-400">Admin Panel · v1.0</p>
+                </div>
             </aside>
         </>
     );

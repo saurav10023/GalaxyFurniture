@@ -10,6 +10,10 @@ import { useState } from "react";
 import { updateCategory, activateCategory, deactivateCategory, deleteCategory } from "../../../api/admin/categories.api";
 import CategoryFieldManager from "./CategoryFieldManager";
 
+const inputClass =
+    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
+const labelClass = "mb-1 block text-sm font-medium text-slate-700";
+
 export default function CategoryEditModal({ category, onClose, onUpdated, onDeleted }) {
     const [name, setName] = useState(category.name || "");
     const [description, setDescription] = useState(category.description || "");
@@ -77,13 +81,19 @@ export default function CategoryEditModal({ category, onClose, onUpdated, onDele
     const busy = savingDetails || togglingActive || deleting;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/30" onClick={busy ? undefined : onClose} />
-            <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white rounded-xl shadow-xl">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-                    <div>
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={busy ? undefined : onClose} />
+
+            <div className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:max-w-xl sm:rounded-2xl">
+                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                    <div className="min-w-0">
                         <h2 className="text-base font-semibold text-slate-900">Edit category</h2>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+                            <span
+                                className={`inline-block h-1.5 w-1.5 rounded-full ${
+                                    isActive ? "bg-emerald-500" : "bg-slate-300"
+                                }`}
+                            />
                             {isActive ? "Active" : "Deactivated"} · visible to customers only when active
                         </p>
                     </div>
@@ -91,69 +101,87 @@ export default function CategoryEditModal({ category, onClose, onUpdated, onDele
                         type="button"
                         onClick={onClose}
                         disabled={busy}
-                        className="text-slate-400 hover:text-slate-600 text-xl leading-none disabled:opacity-40"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-40"
+                        aria-label="Close"
                     >
-                        ×
+                        <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
                     </button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="space-y-6 overflow-y-auto p-5 sm:p-6">
                     {error && (
-                        <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">{error}</div>
+                        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
                     )}
 
                     <form onSubmit={saveDetails} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Category name</label>
+                            <label className={labelClass}>Category name</label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                                className={inputClass}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                            <label className={labelClass}>Description</label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={2}
-                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                                className={`${inputClass} resize-none`}
                             />
                         </div>
-                        <label className="flex items-center gap-2 text-sm text-slate-600">
-                            <input
-                                type="checkbox"
-                                checked={isFeatured}
-                                onChange={(e) => setIsFeatured(e.target.checked)}
-                                className="rounded border-slate-300"
-                            />
-                            Featured category
+                        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 transition hover:border-slate-300">
+                            <span className="text-sm text-slate-700">
+                                Show in <span className="font-medium">"Featured Categories"</span>
+                            </span>
+                            <span className="relative inline-flex shrink-0 items-center">
+                                <input
+                                    type="checkbox"
+                                    checked={isFeatured}
+                                    onChange={(e) => setIsFeatured(e.target.checked)}
+                                    className="peer sr-only"
+                                />
+                                <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
+                                <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+                            </span>
                         </label>
 
                         <div className="flex justify-end">
                             <button
                                 type="submit"
                                 disabled={busy}
-                                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
                             >
                                 {savingDetails ? "Saving…" : "Save details"}
                             </button>
                         </div>
                     </form>
 
-                    <fieldset className="rounded-lg border border-slate-200 p-4">
-                        <legend className="px-1 text-sm font-medium text-slate-700">Custom fields</legend>
-                        <CategoryFieldManager categoryId={category._id} fields={fields} onFieldsChanged={setFields} />
+                    <fieldset className="rounded-xl border border-slate-200 p-4">
+                        <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-700">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+                                <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
+                                    <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                                </svg>
+                            </span>
+                            Custom fields
+                        </legend>
+                        <div className="mt-3">
+                            <CategoryFieldManager categoryId={category._id} fields={fields} onFieldsChanged={setFields} />
+                        </div>
                     </fieldset>
 
-                    <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                    <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
                         <button
                             type="button"
                             onClick={toggleActive}
                             disabled={busy}
-                            className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+                            className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
                         >
                             {togglingActive ? "…" : isActive ? "Deactivate category" : "Activate category"}
                         </button>
@@ -161,7 +189,7 @@ export default function CategoryEditModal({ category, onClose, onUpdated, onDele
                             type="button"
                             onClick={handleDelete}
                             disabled={busy}
-                            className="rounded-md px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 disabled:opacity-40"
+                            className="rounded-full px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50 disabled:opacity-40"
                         >
                             {deleting ? "Deleting…" : "Delete category"}
                         </button>

@@ -71,7 +71,7 @@ export default function CategoryCreateForm({ onCreated }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
+            className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:space-y-7 sm:p-6 lg:p-7"
         >
             <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
@@ -85,7 +85,7 @@ export default function CategoryCreateForm({ onCreated }) {
                         />
                     </svg>
                 </div>
-                <div>
+                <div className="min-w-0">
                     <h2 className="text-lg font-semibold tracking-tight text-slate-900">New category</h2>
                     <p className="mt-0.5 text-sm text-slate-500">
                         Categories group products and can define their own custom fields.
@@ -122,9 +122,9 @@ export default function CategoryCreateForm({ onCreated }) {
                 </div>
 
                 <div>
-                    <div className="mb-1.5 flex items-baseline justify-between">
+                    <div className="mb-1.5 flex items-baseline justify-between gap-2">
                         <label className="text-sm font-medium text-slate-700">Description</label>
-                        <span className="text-xs text-slate-400">
+                        <span className="shrink-0 text-xs tabular-nums text-slate-400">
                             {form.description.length}/{DESCRIPTION_LIMIT}
                         </span>
                     </div>
@@ -137,7 +137,7 @@ export default function CategoryCreateForm({ onCreated }) {
                     />
                 </div>
 
-                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3">
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 transition hover:border-slate-300">
                     <span className="text-sm text-slate-700">
                         Show in <span className="font-medium">"Featured Categories"</span> on the homepage
                     </span>
@@ -158,11 +158,11 @@ export default function CategoryCreateForm({ onCreated }) {
                 <CategoryFieldBuilder fields={fields} onChange={setFields} />
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 pt-5">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {submitting && (
                         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">

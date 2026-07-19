@@ -42,11 +42,19 @@ function Toggle({ checked, onChange }) {
     );
 }
 
+function SectionIcon({ children }) {
+    return (
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+            {children}
+        </span>
+    );
+}
+
 function Section({ icon, title, children }) {
     return (
         <fieldset className="rounded-xl border border-slate-200 p-4 sm:p-5">
             <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-700">
-                {icon}
+                <SectionIcon>{icon}</SectionIcon>
                 {title}
             </legend>
             <div className="mt-3 space-y-4">{children}</div>
@@ -287,7 +295,7 @@ export default function ProductCreateForm({ onCreated }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
+            className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:space-y-7 sm:p-6 lg:p-7"
         >
             <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
@@ -301,7 +309,7 @@ export default function ProductCreateForm({ onCreated }) {
                         />
                     </svg>
                 </div>
-                <div>
+                <div className="min-w-0">
                     <h2 className="text-lg font-semibold tracking-tight text-slate-900">New product</h2>
                     <p className="mt-0.5 text-sm text-slate-500">Add a product to the catalog.</p>
                 </div>
@@ -336,7 +344,7 @@ export default function ProductCreateForm({ onCreated }) {
                 </div>
                 <div>
                     <label className={labelClass}>Category</label>
-                    <CategorySelect value={categoryId} onChange={handleCategoryChange} />
+                    <CategorySelect value={categoryId} onChange={handleCategoryChange} label="" />
                 </div>
             </div>
 
@@ -382,7 +390,7 @@ export default function ProductCreateForm({ onCreated }) {
             <Section
                 title="Dimensions"
                 icon={
-                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
                         <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
                     </svg>
                 }
@@ -418,7 +426,7 @@ export default function ProductCreateForm({ onCreated }) {
             <Section
                 title="Pricing"
                 icon={
-                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
                         <path
                             d="M12 2v20M17 5.5H9.5a2.5 2.5 0 000 5h5a2.5 2.5 0 010 5H6.5"
                             stroke="currentColor"
@@ -516,11 +524,11 @@ export default function ProductCreateForm({ onCreated }) {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
-                <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 sm:flex-1">
+                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300">
                     <Toggle checked={form.isFeatured} onChange={(v) => set("isFeatured", v)} />
                     Featured product
                 </label>
-                <label className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 sm:flex-1">
+                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300">
                     <Toggle checked={form.isNewArrival} onChange={(v) => set("isNewArrival", v)} />
                     New arrival
                 </label>
@@ -531,24 +539,26 @@ export default function ProductCreateForm({ onCreated }) {
                 <Section
                     title="Category-specific details"
                     icon={
-                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-slate-400">
+                        <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
                             <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                         </svg>
                     }
                 >
-                    {categoryFields.map((field) => (
-                        <div key={field.key}>
-                            <label className={smallLabelClass}>
-                                {field.name}
-                                {field.required && <span className="text-red-500"> *</span>}
-                            </label>
-                            <AttributeInput
-                                field={field}
-                                value={attributes[field.key]}
-                                onChange={(value) => setAttributes((prev) => ({ ...prev, [field.key]: value }))}
-                            />
-                        </div>
-                    ))}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {categoryFields.map((field) => (
+                            <div key={field.key}>
+                                <label className={smallLabelClass}>
+                                    {field.name}
+                                    {field.required && <span className="text-red-500"> *</span>}
+                                </label>
+                                <AttributeInput
+                                    field={field}
+                                    value={attributes[field.key]}
+                                    onChange={(value) => setAttributes((prev) => ({ ...prev, [field.key]: value }))}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </Section>
             )}
 
@@ -602,7 +612,8 @@ export default function ProductCreateForm({ onCreated }) {
                             />
                         </svg>
                         <p className="text-sm text-slate-500">
-                            <span className="font-medium text-indigo-600">Click to upload</span> or drag and drop
+                            <span className="font-medium text-indigo-600">Click to upload</span>
+                            <span className="hidden sm:inline"> or drag and drop</span>
                         </p>
                         <p className="text-xs text-slate-400">{MAX_IMAGES - images.length} slot{MAX_IMAGES - images.length === 1 ? "" : "s"} left</p>
                         <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
@@ -610,11 +621,11 @@ export default function ProductCreateForm({ onCreated }) {
                 )}
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 pt-5">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {submitting && (
                         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">
