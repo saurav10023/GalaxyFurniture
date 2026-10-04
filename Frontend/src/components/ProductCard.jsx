@@ -1,89 +1,55 @@
 // src/components/ProductCard.jsx
-//
-// Renders only whatever fields are present on `product.pricing` -- never
-// assumes purchasePrice/negotiation exist, since customer-facing responses
-// never include them (stripped server-side by sanitizeProduct.js).
+// Shared light-theme product card used on the home page.
+// mix-blend-multiply lets product photos shot on white/grey backgrounds
+// melt into the cream surface instead of showing a hard white box.
 
 import { Link } from "react-router-dom";
-
-// A couple of quick-glance spec chips per category, pulled straight off the
-// product doc (each field only renders if it's actually present).
-const SPEC_FIELDS_BY_CATEGORY = {
-  mobile: [
-    { key: "ram", suffix: "" },
-    { key: "rom", suffix: "" },
-    { key: "network", suffix: "" },
-  ],
-  headphone: [
-    { key: "type", suffix: "" },
-    { key: "noiseCancellation", label: "ANC", boolOnly: true },
-  ],
-  charger: [
-    { key: "wattage", suffix: "W" },
-    { key: "portType", suffix: "" },
-  ],
-  powerbank: [
-    { key: "capacity", suffix: " mAh" },
-    { key: "wirelessCharging", label: "Wireless", boolOnly: true },
-  ],
-};
+import { Armchair } from "lucide-react";
+import { displayName, firstImage, priceLabel } from "../lib/product";
 
 const ProductCard = ({ product }) => {
-  const specFields = SPEC_FIELDS_BY_CATEGORY[product.category] || [];
-  const specs = specFields
-    .map((f) => {
-      const val = product[f.key];
-      if (f.boolOnly) return val ? f.label : null;
-      if (val === undefined || val === null || val === "") return null;
-      return `${val}${f.suffix}`;
-    })
-    .filter(Boolean);
+  const img = firstImage(product);
+  const price = priceLabel(product);
+  const category = displayName(product.category);
 
   return (
     <Link
       to={`/product/${product._id}`}
-      className="group block rounded-xl border border-[#E1E3DD] bg-white overflow-hidden hover:border-[#14171C] transition-colors duration-150"
+      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-4 focus-visible:ring-offset-paper rounded-2xl"
     >
-      <div className="aspect-square bg-[#F6F7F3] flex items-center justify-center overflow-hidden">
-        {product.images?.[0]?.url ? (
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-linen">
+        {img ? (
           <img
-            src={product.images[0].url}
+            src={img}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-contain p-5 mix-blend-multiply transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           />
         ) : (
-          <span className="font-mono text-[11px] text-[#9CA0A6] uppercase">No image</span>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Armchair className="w-12 h-12 text-clay/60 stroke-[1]" />
+          </div>
         )}
-        {!product.isActive && (
-          <span className="absolute mt-2 ml-2 self-start rounded-full bg-[#F1F1EE] text-[#4B4F57] text-[10.5px] font-medium px-2 py-0.5">
-            Inactive
+
+        {product.isNewArrival && (
+          <span className="absolute top-3 left-3 rounded-full bg-card/90 border border-line px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-moss">
+            New
           </span>
         )}
       </div>
 
-      <div className="p-3.5">
-        <p className="text-[12px] text-[#9CA0A6] font-mono uppercase tracking-wide mb-0.5">
-          {product.brand}
-        </p>
-        <h3 className="text-[14.5px] font-medium text-[#14171C] leading-snug mb-1.5 line-clamp-2">
+      <div className="pt-4 px-0.5">
+        {category && (
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-stone truncate">
+            {category}
+          </p>
+        )}
+        <h3 className="mt-1 font-serif text-[21px] leading-tight font-semibold text-ink line-clamp-1 group-hover:text-moss transition-colors">
           {product.name}
         </h3>
-
-        {specs.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {specs.map((s) => (
-              <span
-                key={s}
-                className="font-mono text-[10.5px] text-[#4B4F57] bg-[#F6F7F3] border border-[#E1E3DD] rounded-full px-2 py-0.5"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <p className="font-mono text-[15px] font-semibold text-[#14171C]">
-          ₹{product.pricing?.sellingPrice?.toLocaleString("en-IN")}
+        <p className="mt-1.5 text-[14.5px] text-ink/80">
+          {price.prefix && <span className="text-stone mr-1">{price.prefix}</span>}
+          <span className={price.numeric ? "font-medium" : "text-stone italic"}>{price.text}</span>
         </p>
       </div>
     </Link>

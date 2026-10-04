@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { updatePayment } from "../../../api/admin/payments.api";
 import { IconClose } from "../icons/AdminIcons";
+import Select from "../../ui/Select";
 
 const MODE_OPTIONS = [
     { value: "cash", label: "Cash" },
@@ -12,7 +13,8 @@ const MODE_OPTIONS = [
 ];
 
 const fieldClasses =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
+    "w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
+const labelClasses = "block text-xs font-medium text-stone mb-1.5";
 
 const toDateInputValue = (date) => new Date(date).toISOString().slice(0, 10);
 
@@ -55,18 +57,18 @@ export default function EditPaymentModal({ payment, onClose, onUpdated }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[1px]" onClick={saving ? undefined : onClose} />
+            <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" onClick={saving ? undefined : onClose} />
             <form
                 onSubmit={handleSubmit}
-                className="relative w-full max-w-sm rounded-xl bg-white shadow-xl"
+                className="relative w-full max-w-sm rounded-3xl bg-card/95 backdrop-blur-xl border border-line shadow-[0_24px_48px_-20px_rgba(42,37,31,0.35)]"
             >
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                    <h3 className="text-sm font-semibold text-slate-800">Edit payment</h3>
+                <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+                    <h3 className="font-display text-xl font-semibold text-ink">Edit payment</h3>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={saving}
-                        className="text-slate-400 hover:text-slate-600 p-1 -mr-1 rounded disabled:opacity-40"
+                        className="text-stone hover:text-ink hover:bg-linen p-1.5 -mr-1.5 rounded-full disabled:opacity-40 transition-colors"
                         aria-label="Close"
                     >
                         <IconClose className="h-4 w-4" />
@@ -75,7 +77,7 @@ export default function EditPaymentModal({ payment, onClose, onUpdated }) {
 
                 <div className="p-5 space-y-4">
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Amount</label>
+                        <label className={labelClasses}>Amount</label>
                         <input
                             type="number"
                             min="0.01"
@@ -87,7 +89,7 @@ export default function EditPaymentModal({ payment, onClose, onUpdated }) {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Paid on</label>
+                        <label className={labelClasses}>Paid on</label>
                         <input
                             type="date"
                             value={paidOn}
@@ -97,18 +99,12 @@ export default function EditPaymentModal({ payment, onClose, onUpdated }) {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Mode</label>
-                        <select value={mode} onChange={(e) => setMode(e.target.value)} className={fieldClasses}>
-                            {MODE_OPTIONS.map((m) => (
-                                <option key={m.value} value={m.value}>
-                                    {m.label}
-                                </option>
-                            ))}
-                        </select>
+                        <label className={labelClasses}>Mode</label>
+                        <Select value={mode} onChange={setMode} options={MODE_OPTIONS} fullWidth />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Note (optional)</label>
+                        <label className={labelClasses}>Note (optional)</label>
                         <input
                             type="text"
                             value={note}
@@ -117,21 +113,21 @@ export default function EditPaymentModal({ payment, onClose, onUpdated }) {
                         />
                     </div>
 
-                    {error && <p className="text-xs text-red-600">{error}</p>}
+                    {error && <p className="text-xs text-red-700">{error}</p>}
 
                     <div className="flex justify-end gap-2 pt-1">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={saving}
-                            className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                            className="rounded-full px-4 py-2 text-sm font-medium text-stone hover:bg-linen hover:text-ink disabled:opacity-40 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                            className="rounded-full bg-moss px-5 py-2 text-sm font-medium text-card hover:bg-moss/90 disabled:opacity-50 transition-colors"
                         >
                             {saving ? "Saving…" : "Save changes"}
                         </button>

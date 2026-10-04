@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { recordPayment } from "../../../api/admin/payments.api";
 import { IconClose } from "../icons/AdminIcons";
+import Select from "../../ui/Select";
 
 const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
@@ -14,7 +15,8 @@ const MODE_OPTIONS = [
 ];
 
 const fieldClasses =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
+    "w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
+const labelClasses = "block text-xs font-medium text-stone mb-1.5";
 
 function todayInputValue() {
     return new Date().toISOString().slice(0, 10);
@@ -62,12 +64,13 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[1px]" onClick={submitting ? undefined : onClose} />
-            <div className="relative w-full max-w-sm bg-white rounded-xl shadow-xl">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" onClick={submitting ? undefined : onClose} />
+            {/* Near-opaque cream glass, per the dropdown/info-card spec */}
+            <div className="relative w-full max-w-sm bg-card/95 backdrop-blur-xl border border-line rounded-3xl shadow-[0_24px_48px_-20px_rgba(42,37,31,0.35)]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-line">
                     <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-slate-800">Record payment</h3>
-                        <p className="text-xs text-slate-400 mt-0.5 truncate">
+                        <h3 className="font-display text-xl font-semibold text-ink">Record payment</h3>
+                        <p className="text-xs text-stone mt-0.5 truncate">
                             Invoice {sale.invoiceNumber} · Due {money(sale.pendingAmount)}
                         </p>
                     </div>
@@ -75,7 +78,7 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
                         type="button"
                         onClick={onClose}
                         disabled={submitting}
-                        className="text-slate-400 hover:text-slate-600 p-1 -mr-1 rounded disabled:opacity-40 shrink-0"
+                        className="text-stone hover:text-ink hover:bg-linen p-1.5 -mr-1.5 rounded-full disabled:opacity-40 shrink-0 transition-colors"
                         aria-label="Close"
                     >
                         <IconClose className="h-4 w-4" />
@@ -84,7 +87,7 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
 
                 <form onSubmit={handleSubmit} className="p-5 space-y-4">
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Amount</label>
+                        <label className={labelClasses}>Amount</label>
                         <input
                             type="number"
                             min="1"
@@ -97,7 +100,7 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Date paid</label>
+                        <label className={labelClasses}>Date paid</label>
                         <input
                             type="date"
                             value={paidOn}
@@ -108,18 +111,12 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Payment mode</label>
-                        <select value={mode} onChange={(e) => setMode(e.target.value)} className={fieldClasses}>
-                            {MODE_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </option>
-                            ))}
-                        </select>
+                        <label className={labelClasses}>Payment mode</label>
+                        <Select value={mode} onChange={setMode} options={MODE_OPTIONS} fullWidth />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Note (optional)</label>
+                        <label className={labelClasses}>Note (optional)</label>
                         <input
                             type="text"
                             value={note}
@@ -129,21 +126,21 @@ export default function RecordPaymentModal({ sale, onClose, onRecorded }) {
                         />
                     </div>
 
-                    {error && <p className="text-xs text-red-600">{error}</p>}
+                    {error && <p className="text-xs text-red-700">{error}</p>}
 
                     <div className="flex justify-end gap-2 pt-2">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+                            className="rounded-full px-4 py-2 text-sm font-medium text-stone hover:bg-linen hover:text-ink disabled:opacity-40 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={submitting}
-                            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                            className="rounded-full bg-moss px-5 py-2 text-sm font-medium text-card hover:bg-moss/90 disabled:opacity-50 transition-colors"
                         >
                             {submitting ? "Saving…" : "Record payment"}
                         </button>

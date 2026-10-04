@@ -1,9 +1,24 @@
 // src/components/admin/products/ProductCreateForm.jsx
 import { useState } from "react";
 import CategorySelect from "./CategorySelect";
+import Select from "../../ui/Select";
 import { createProduct, setInitialStock } from "../../../api/admin/products.api";
 
 const MAX_IMAGES = 5;
+
+const UNIT_OPTIONS = [
+    { value: "cm", label: "cm" },
+    { value: "inch", label: "inch" }
+];
+const DISPLAY_MODE_OPTIONS = [
+    { value: "show_price", label: "Show price" },
+    { value: "contact_for_price", label: "Contact for price" },
+    { value: "starting_from", label: "Starting from price" }
+];
+const OUT_OF_STOCK_OPTIONS = [
+    { value: "show_as_out_of_stock", label: 'Show as "Out of Stock"' },
+    { value: "hide", label: "Hide from customers" }
+];
 
 const initialForm = {
     name: "",
@@ -26,25 +41,25 @@ const initialForm = {
 };
 
 const inputClass =
-    "w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
+    "w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-4 focus:ring-moss/10";
 const smallInputClass =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
-const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
-const smallLabelClass = "mb-1 block text-xs font-medium text-slate-500";
+    "w-full rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-4 focus:ring-moss/10";
+const labelClass = "mb-1.5 block text-sm font-medium text-ink";
+const smallLabelClass = "mb-1 block text-xs font-medium text-stone";
 
 function Toggle({ checked, onChange }) {
     return (
         <span className="relative inline-flex shrink-0 items-center">
             <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-            <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
-            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+            <span className="h-6 w-11 rounded-full bg-stone/30 transition peer-checked:bg-moss peer-focus-visible:ring-2 peer-focus-visible:ring-moss/40" />
+            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition peer-checked:translate-x-5" />
         </span>
     );
 }
 
 function SectionIcon({ children }) {
     return (
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-linen text-clay">
             {children}
         </span>
     );
@@ -52,8 +67,8 @@ function SectionIcon({ children }) {
 
 function Section({ icon, title, children }) {
     return (
-        <fieldset className="rounded-xl border border-slate-200 p-4 sm:p-5">
-            <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-700">
+        <fieldset className="rounded-2xl border border-line p-4 sm:p-5">
+            <legend className="flex items-center gap-2 px-1 text-sm font-semibold text-ink">
                 <SectionIcon>{icon}</SectionIcon>
                 {title}
             </legend>
@@ -91,7 +106,7 @@ function AttributeInput({ field, value, onChange }) {
             );
         case "boolean":
             return (
-                <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                <label className="flex items-center gap-2.5 text-sm text-stone">
                     <Toggle checked={Boolean(value)} onChange={onChange} />
                     Yes
                 </label>
@@ -106,21 +121,18 @@ function AttributeInput({ field, value, onChange }) {
                     type="color"
                     value={value || "#000000"}
                     onChange={(e) => onChange(e.target.value)}
-                    className="h-10 w-16 cursor-pointer rounded-lg border border-slate-300"
+                    className="h-10 w-16 cursor-pointer rounded-xl border border-line bg-card"
                 />
             );
         case "select":
             return (
-                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={smallInputClass}>
-                    <option value="" disabled>
-                        Select…
-                    </option>
-                    {(field.options || []).map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
+                <Select
+                    value={value ?? ""}
+                    onChange={onChange}
+                    options={(field.options || []).map((opt) => ({ value: opt, label: opt }))}
+                    placeholder="Select…"
+                    fullWidth
+                />
             );
         case "multiselect": {
             const selected = Array.isArray(value) ? value : [];
@@ -135,8 +147,8 @@ function AttributeInput({ field, value, onChange }) {
                             onClick={() => toggle(opt)}
                             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                                 selected.includes(opt)
-                                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                                    ? "border-moss bg-moss/10 text-moss"
+                                    : "border-line text-stone hover:bg-linen"
                             }`}
                         >
                             {opt}
@@ -295,11 +307,11 @@ export default function ProductCreateForm({ onCreated }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:space-y-7 sm:p-6 lg:p-7"
+            className="space-y-6 rounded-3xl border border-line bg-card p-4 sm:space-y-7 sm:p-6 lg:p-8"
         >
             <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-indigo-600">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-linen">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-clay">
                         <path
                             d="M12 4v16m8-8H4"
                             stroke="currentColor"
@@ -310,14 +322,14 @@ export default function ProductCreateForm({ onCreated }) {
                     </svg>
                 </div>
                 <div className="min-w-0">
-                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">New product</h2>
-                    <p className="mt-0.5 text-sm text-slate-500">Add a product to the catalog.</p>
+                    <h2 className="font-display text-2xl font-semibold text-ink">New product</h2>
+                    <p className="mt-0.5 text-sm text-stone">Add a product to the catalog.</p>
                 </div>
             </div>
 
             {error && (
-                <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-500">
+                <div className="flex items-start gap-2.5 rounded-2xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-600">
                         <path
                             d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1.5 1.5 0 003.5 20h17a1.5 1.5 0 001.39-2.06L13.71 3.86a1.5 1.5 0 00-2.42 0z"
                             stroke="currentColor"
@@ -410,14 +422,12 @@ export default function ProductCreateForm({ onCreated }) {
                     ))}
                     <div>
                         <label className={smallLabelClass}>Unit</label>
-                        <select
+                        <Select
                             value={form.dimensions.unit}
-                            onChange={(e) => set("dimensions.unit", e.target.value)}
-                            className={smallInputClass}
-                        >
-                            <option value="cm">cm</option>
-                            <option value="inch">inch</option>
-                        </select>
+                            onChange={(v) => set("dimensions.unit", v)}
+                            options={UNIT_OPTIONS}
+                            fullWidth
+                        />
                     </div>
                 </div>
             </Section>
@@ -462,18 +472,15 @@ export default function ProductCreateForm({ onCreated }) {
                 </div>
                 <div>
                     <label className={smallLabelClass}>Price display</label>
-                    <select
+                    <Select
                         value={form.pricing.displayMode}
-                        onChange={(e) => set("pricing.displayMode", e.target.value)}
-                        className={smallInputClass}
-                    >
-                        <option value="show_price">Show price</option>
-                        <option value="contact_for_price">Contact for price</option>
-                        <option value="starting_from">Starting from price</option>
-                    </select>
+                        onChange={(v) => set("pricing.displayMode", v)}
+                        options={DISPLAY_MODE_OPTIONS}
+                        fullWidth
+                    />
                 </div>
                 <div className="space-y-3">
-                    <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                    <label className="flex items-center gap-2.5 text-sm text-stone">
                         <Toggle
                             checked={form.pricing.negotiation.enabled}
                             onChange={(v) => set("pricing.negotiation.enabled", v)}
@@ -499,7 +506,7 @@ export default function ProductCreateForm({ onCreated }) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label className={labelClass}>
-                        Starting stock <span className="font-normal text-slate-400">(optional)</span>
+                        Starting stock <span className="font-normal text-stone">(optional)</span>
                     </label>
                     <input
                         type="number"
@@ -512,23 +519,21 @@ export default function ProductCreateForm({ onCreated }) {
                 </div>
                 <div>
                     <label className={labelClass}>When out of stock</label>
-                    <select
+                    <Select
                         value={form.outOfStockAction}
-                        onChange={(e) => set("outOfStockAction", e.target.value)}
-                        className={inputClass}
-                    >
-                        <option value="show_as_out_of_stock">Show as "Out of Stock"</option>
-                        <option value="hide">Hide from customers</option>
-                    </select>
+                        onChange={(v) => set("outOfStockAction", v)}
+                        options={OUT_OF_STOCK_OPTIONS}
+                        fullWidth
+                    />
                 </div>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
-                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300">
+                <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-line bg-linen/50 px-4 py-3 text-sm text-ink transition hover:border-clay/50">
                     <Toggle checked={form.isFeatured} onChange={(v) => set("isFeatured", v)} />
                     Featured product
                 </label>
-                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300">
+                <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-line bg-linen/50 px-4 py-3 text-sm text-ink transition hover:border-clay/50">
                     <Toggle checked={form.isNewArrival} onChange={(v) => set("isNewArrival", v)} />
                     New arrival
                 </label>
@@ -549,7 +554,7 @@ export default function ProductCreateForm({ onCreated }) {
                             <div key={field.key}>
                                 <label className={smallLabelClass}>
                                     {field.name}
-                                    {field.required && <span className="text-red-500"> *</span>}
+                                    {field.required && <span className="text-red-700"> *</span>}
                                 </label>
                                 <AttributeInput
                                     field={field}
@@ -565,7 +570,7 @@ export default function ProductCreateForm({ onCreated }) {
             {/* Images */}
             <div>
                 <label className={labelClass}>
-                    Images <span className="font-normal text-slate-400">(up to {MAX_IMAGES})</span>
+                    Images <span className="font-normal text-stone">(up to {MAX_IMAGES})</span>
                 </label>
 
                 {images.length > 0 && (
@@ -575,12 +580,12 @@ export default function ProductCreateForm({ onCreated }) {
                                 <img
                                     src={URL.createObjectURL(file)}
                                     alt={file.name}
-                                    className="aspect-square w-full rounded-lg border border-slate-200 object-cover"
+                                    className="aspect-[4/3] w-full rounded-xl border border-line bg-linen object-cover"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeImage(i)}
-                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-xs leading-none text-white shadow transition hover:bg-slate-900"
+                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-xs leading-none text-card shadow transition hover:bg-moss"
                                     aria-label={`Remove ${file.name}`}
                                 >
                                     ×
@@ -598,11 +603,11 @@ export default function ProductCreateForm({ onCreated }) {
                         }}
                         onDragLeave={() => setIsDraggingImages(false)}
                         onDrop={handleImageDrop}
-                        className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed px-4 py-6 text-center transition ${
-                            isDraggingImages ? "border-indigo-400 bg-indigo-50/60" : "border-slate-200 hover:bg-slate-50"
+                        className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-4 py-6 text-center transition ${
+                            isDraggingImages ? "border-clay bg-clay/10" : "border-line hover:bg-linen/50"
                         }`}
                     >
-                        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-slate-400">
+                        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-clay">
                             <path
                                 d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
                                 stroke="currentColor"
@@ -611,21 +616,21 @@ export default function ProductCreateForm({ onCreated }) {
                                 strokeLinejoin="round"
                             />
                         </svg>
-                        <p className="text-sm text-slate-500">
-                            <span className="font-medium text-indigo-600">Click to upload</span>
+                        <p className="text-sm text-stone">
+                            <span className="font-medium text-moss">Click to upload</span>
                             <span className="hidden sm:inline"> or drag and drop</span>
                         </p>
-                        <p className="text-xs text-slate-400">{MAX_IMAGES - images.length} slot{MAX_IMAGES - images.length === 1 ? "" : "s"} left</p>
+                        <p className="text-xs text-stone">{MAX_IMAGES - images.length} slot{MAX_IMAGES - images.length === 1 ? "" : "s"} left</p>
                         <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
                     </label>
                 )}
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:justify-end">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-moss px-6 py-2.5 text-sm font-medium text-card transition hover:bg-moss/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {submitting && (
                         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">

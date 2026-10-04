@@ -37,30 +37,30 @@ export default function ProductManagement() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8 text-ink">
             <div className="flex items-center gap-3">
-                <div className="hidden sm:flex h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 items-center justify-center shrink-0">
+                <div className="hidden sm:flex h-11 w-11 rounded-full bg-linen text-clay items-center justify-center shrink-0">
                     <IconProducts className="h-5 w-5" />
                 </div>
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Products</h1>
-                    <p className="text-sm text-slate-500 mt-0.5">
+                    <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink">Products</h1>
+                    <p className="text-sm text-stone mt-0.5">
                         Create products and categories, and manage your existing catalog.
                     </p>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-                <div className="flex gap-1 border-b border-slate-200 mb-4 -mt-1 overflow-x-auto">
+            <div className="rounded-3xl border border-line bg-card p-4 sm:p-6">
+                <div className="flex gap-2 mb-5 overflow-x-auto">
                     {TABS.map((tab) => (
                         <button
                             key={tab.key}
                             type="button"
                             onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
+                            className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
                                 activeTab === tab.key
-                                    ? "border-indigo-600 text-indigo-700"
-                                    : "border-transparent text-slate-500 hover:text-slate-700"
+                                    ? "bg-moss text-card"
+                                    : "text-stone hover:bg-linen hover:text-ink"
                             }`}
                         >
                             {tab.label}
@@ -75,12 +75,12 @@ export default function ProductManagement() {
                 )}
             </div>
 
-            <div className="border-t border-slate-200 pt-8">
-                <h2 className="text-base font-semibold text-slate-800 mb-3">Categories</h2>
+            <div className="border-t border-line pt-8">
+                <h2 className="font-display text-xl font-semibold text-ink mb-3">Categories</h2>
                 <CategoryManagementBoard refreshKey={refreshKey} onEditCategory={handleEditCategory} />
             </div>
 
-            <div className="border-t border-slate-200 pt-8">
+            <div className="border-t border-line pt-8">
                 <CategoryProductsBoard refreshKey={refreshKey} onEditProduct={handleEditProduct} />
             </div>
 

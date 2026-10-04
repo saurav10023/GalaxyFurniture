@@ -18,6 +18,16 @@ const MONTH_LABELS = [
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
+// Galaxy Furniture palette (recharts needs raw hex, not Tailwind classes)
+const COLORS = {
+    line: "#E2D8C6",
+    stone: "#6F665A",
+    ink: "#2A251F",
+    card: "#FFFDF9",
+    moss: "#4A4A2C",
+    clay: "#A67C52"
+};
+
 const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
 // year: optional — omit for all-time monthly buckets
@@ -62,48 +72,56 @@ export default function RevenueChart({ year }) {
     }, [year]);
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-            <h2 className="text-sm font-semibold text-slate-900">Revenue by month</h2>
-            <p className="text-xs text-slate-500 mt-0.5 mb-4">
+        <div className="rounded-3xl border border-line bg-card p-4 sm:p-6">
+            <h2 className="font-display text-xl font-semibold text-ink">Revenue by month</h2>
+            <p className="text-xs text-stone mt-0.5 mb-4">
                 {year ? `Monthly trend for ${year}` : "All-time monthly trend"}
             </p>
 
             {loading ? (
-                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-slate-400">
+                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-stone">
                     Loading chart…
                 </div>
             ) : error ? (
-                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-red-600">{error}</div>
+                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-red-700">{error}</div>
             ) : rows.length === 0 ? (
-                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-slate-400">
+                <div className="h-64 sm:h-72 flex items-center justify-center text-sm text-stone">
                     No sales in this period yet.
                 </div>
             ) : (
                 <div className="h-64 sm:h-72">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={rows} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.line} vertical={false} />
                             <XAxis
                                 dataKey="label"
-                                tick={{ fontSize: 11, fill: "#64748b" }}
-                                axisLine={{ stroke: "#e2e8f0" }}
+                                tick={{ fontSize: 11, fill: COLORS.stone }}
+                                axisLine={{ stroke: COLORS.line }}
                                 tickLine={false}
                                 interval="preserveStartEnd"
                             />
                             <YAxis
-                                tick={{ fontSize: 11, fill: "#64748b" }}
+                                tick={{ fontSize: 11, fill: COLORS.stone }}
                                 axisLine={false}
                                 tickLine={false}
                                 width={44}
                                 tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
                             />
                             <Tooltip
+                                cursor={{ fill: "rgba(166,124,82,0.08)" }}
                                 formatter={(value, name) => [money(value), name === "revenue" ? "Revenue" : "Profit"]}
-                                contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: "#e2e8f0" }}
+                                contentStyle={{
+                                    fontSize: 12,
+                                    borderRadius: 16,
+                                    border: `1px solid ${COLORS.line}`,
+                                    background: COLORS.card,
+                                    color: COLORS.ink,
+                                    boxShadow: "0 12px 32px -12px rgba(42,37,31,0.25)"
+                                }}
                             />
-                            <Legend wrapperStyle={{ fontSize: 12 }} />
-                            <Bar dataKey="revenue" name="Revenue" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="profit" name="Profit" fill="#10b981" radius={[4, 4, 0, 0]} />
+                            <Legend wrapperStyle={{ fontSize: 12, color: COLORS.stone }} />
+                            <Bar dataKey="revenue" name="Revenue" fill={COLORS.moss} radius={[6, 6, 0, 0]} />
+                            <Bar dataKey="profit" name="Profit" fill={COLORS.clay} radius={[6, 6, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

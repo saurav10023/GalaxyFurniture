@@ -51,32 +51,32 @@ export default function PaymentsDueTable({ refreshKey, onSelectCustomer }) {
 
     return (
         <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="rounded-3xl border border-line bg-card p-3">
                 <div className="relative">
-                    <IconSearch className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <IconSearch className="h-4 w-4 text-stone absolute left-4 top-1/2 -translate-y-1/2" />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search customers with dues…"
-                        className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full rounded-full border border-line bg-card pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
                     />
                 </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                <div className="px-4 sm:px-5 py-4 border-b border-slate-100">
-                    <h2 className="text-sm font-semibold text-slate-900">Customers with dues</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Sorted by lifetime spend. Tap a row for details.</p>
+            <div className="rounded-3xl border border-line bg-card overflow-hidden">
+                <div className="px-4 sm:px-6 py-4 border-b border-line">
+                    <h2 className="font-display text-xl font-semibold text-ink">Customers with dues</h2>
+                    <p className="text-xs text-stone mt-0.5">Sorted by lifetime spend. Tap a row for details.</p>
                 </div>
 
                 {loading ? (
-                    <div className="px-5 py-14 text-sm text-slate-400 text-center">Loading…</div>
+                    <div className="px-5 py-14 text-sm text-stone text-center">Loading…</div>
                 ) : error ? (
-                    <div className="px-5 py-14 text-sm text-red-600 text-center">{error}</div>
+                    <div className="px-5 py-14 text-sm text-red-700 text-center">{error}</div>
                 ) : filtered.length === 0 ? (
-                    <div className="flex flex-col items-center gap-2 text-slate-400 py-14">
-                        <IconInbox className="h-8 w-8" />
+                    <div className="flex flex-col items-center gap-2 text-stone py-14">
+                        <IconInbox className="h-8 w-8 text-clay" />
                         <span className="text-sm">
                             {customers.length === 0 ? "No outstanding balances right now." : "No customers match your search."}
                         </span>
@@ -87,42 +87,42 @@ export default function PaymentsDueTable({ refreshKey, onSelectCustomer }) {
                         <div className="hidden md:block overflow-x-auto">
                             <table className="min-w-full text-sm">
                                 <thead>
-                                    <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide bg-slate-50">
-                                        <th className="px-5 py-2.5">Customer</th>
-                                        <th className="px-5 py-2.5 text-right">Total spent</th>
-                                        <th className="px-5 py-2.5 text-right">Purchases</th>
-                                        <th className="px-5 py-2.5 text-right">Pending</th>
-                                        <th className="px-5 py-2.5">Last purchase</th>
-                                        <th className="px-5 py-2.5" />
+                                    <tr className="text-left text-[11px] font-medium text-stone uppercase tracking-[0.15em] bg-linen/60">
+                                        <th className="px-6 py-3">Customer</th>
+                                        <th className="px-6 py-3 text-right">Total spent</th>
+                                        <th className="px-6 py-3 text-right">Purchases</th>
+                                        <th className="px-6 py-3 text-right">Pending</th>
+                                        <th className="px-6 py-3">Last purchase</th>
+                                        <th className="px-6 py-3" />
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-line">
                                     {filtered.map((customer) => (
                                         <tr
                                             key={customer._id}
                                             onClick={() => onSelectCustomer(customer._id)}
-                                            className="cursor-pointer hover:bg-slate-50/80 transition-colors"
+                                            className="cursor-pointer hover:bg-linen/50 transition-colors"
                                         >
-                                            <td className="px-5 py-3">
-                                                <div className="text-slate-900 font-medium">{customer.name}</div>
-                                                <div className="text-xs text-slate-500">{customer.phone}</div>
+                                            <td className="px-6 py-3.5">
+                                                <div className="text-ink font-medium">{customer.name}</div>
+                                                <div className="text-xs text-stone">{customer.phone}</div>
                                             </td>
-                                            <td className="px-5 py-3 text-right text-slate-600 whitespace-nowrap">
+                                            <td className="px-6 py-3.5 text-right text-stone whitespace-nowrap">
                                                 {money(customer.totalSpent)}
                                             </td>
-                                            <td className="px-5 py-3 text-right text-slate-600">
+                                            <td className="px-6 py-3.5 text-right text-stone">
                                                 {customer.totalPurchases}
                                             </td>
-                                            <td className="px-5 py-3 text-right font-semibold text-amber-700 whitespace-nowrap">
+                                            <td className="px-6 py-3.5 text-right font-semibold text-clay-deep whitespace-nowrap">
                                                 {money(customer.pendingBalance)}
                                             </td>
-                                            <td className="px-5 py-3 text-slate-500 whitespace-nowrap">
+                                            <td className="px-6 py-3.5 text-stone whitespace-nowrap">
                                                 {customer.lastPurchaseDate
                                                     ? new Date(customer.lastPurchaseDate).toLocaleDateString("en-IN")
                                                     : "—"}
                                             </td>
-                                            <td className="px-5 py-3 text-right">
-                                                <IconChevronRight className="h-4 w-4 text-slate-300 inline-block" />
+                                            <td className="px-6 py-3.5 text-right">
+                                                <IconChevronRight className="h-4 w-4 text-clay inline-block" />
                                             </td>
                                         </tr>
                                     ))}
@@ -131,18 +131,18 @@ export default function PaymentsDueTable({ refreshKey, onSelectCustomer }) {
                         </div>
 
                         {/* Mobile cards */}
-                        <div className="md:hidden divide-y divide-slate-100">
+                        <div className="md:hidden divide-y divide-line">
                             {filtered.map((customer) => (
                                 <button
                                     key={customer._id}
                                     type="button"
                                     onClick={() => onSelectCustomer(customer._id)}
-                                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-slate-50 active:bg-slate-100"
+                                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-linen/50 active:bg-linen"
                                 >
                                     <div className="min-w-0 flex-1">
-                                        <div className="text-sm font-medium text-slate-900 truncate">{customer.name}</div>
-                                        <div className="text-xs text-slate-400">{customer.phone}</div>
-                                        <div className="text-xs text-slate-400 mt-0.5">
+                                        <div className="text-sm font-medium text-ink truncate">{customer.name}</div>
+                                        <div className="text-xs text-stone">{customer.phone}</div>
+                                        <div className="text-xs text-stone mt-0.5">
                                             {customer.totalPurchases} purchase{customer.totalPurchases === 1 ? "" : "s"} ·{" "}
                                             {customer.lastPurchaseDate
                                                 ? new Date(customer.lastPurchaseDate).toLocaleDateString("en-IN")
@@ -150,12 +150,12 @@ export default function PaymentsDueTable({ refreshKey, onSelectCustomer }) {
                                         </div>
                                     </div>
                                     <div className="text-right shrink-0">
-                                        <div className="text-sm font-semibold text-amber-700">
+                                        <div className="text-sm font-semibold text-clay-deep">
                                             {money(customer.pendingBalance)}
                                         </div>
-                                        <div className="text-[11px] text-slate-400">pending</div>
+                                        <div className="text-[11px] text-stone">pending</div>
                                     </div>
-                                    <IconChevronRight className="h-4 w-4 text-slate-300 shrink-0" />
+                                    <IconChevronRight className="h-4 w-4 text-clay shrink-0" />
                                 </button>
                             ))}
                         </div>

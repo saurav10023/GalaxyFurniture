@@ -71,11 +71,11 @@ export default function CategoryCreateForm({ onCreated }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:space-y-7 sm:p-6 lg:p-7"
+            className="space-y-6 rounded-3xl border border-line bg-card p-4 sm:space-y-7 sm:p-6 lg:p-7"
         >
             <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-indigo-600">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-linen">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-clay">
                         <path
                             d="M4 6h16M4 6a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"
                             stroke="currentColor"
@@ -86,16 +86,16 @@ export default function CategoryCreateForm({ onCreated }) {
                     </svg>
                 </div>
                 <div className="min-w-0">
-                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">New category</h2>
-                    <p className="mt-0.5 text-sm text-slate-500">
+                    <h2 className="font-display text-2xl font-semibold text-ink">New category</h2>
+                    <p className="mt-0.5 text-sm text-stone">
                         Categories group products and can define their own custom fields.
                     </p>
                 </div>
             </div>
 
             {error && (
-                <div className="flex items-start gap-2.5 rounded-xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-500">
+                <div className="flex items-start gap-2.5 rounded-2xl border border-red-100 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    <svg viewBox="0 0 24 24" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-red-600">
                         <path
                             d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A1.5 1.5 0 003.5 20h17a1.5 1.5 0 001.39-2.06L13.71 3.86a1.5 1.5 0 00-2.42 0z"
                             stroke="currentColor"
@@ -110,21 +110,21 @@ export default function CategoryCreateForm({ onCreated }) {
 
             <div className="space-y-5">
                 <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">Category name</label>
+                    <label className="mb-1.5 block text-sm font-medium text-ink">Category name</label>
                     <input
                         type="text"
                         value={form.name}
                         onChange={(e) => handleChange("name", e.target.value)}
                         placeholder="e.g. Sofas"
-                        className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                        className="w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-4 focus:ring-moss/10"
                         required
                     />
                 </div>
 
                 <div>
                     <div className="mb-1.5 flex items-baseline justify-between gap-2">
-                        <label className="text-sm font-medium text-slate-700">Description</label>
-                        <span className="shrink-0 text-xs tabular-nums text-slate-400">
+                        <label className="text-sm font-medium text-ink">Description</label>
+                        <span className="shrink-0 text-xs tabular-nums text-stone">
                             {form.description.length}/{DESCRIPTION_LIMIT}
                         </span>
                     </div>
@@ -133,12 +133,12 @@ export default function CategoryCreateForm({ onCreated }) {
                         onChange={(e) => handleChange("description", e.target.value.slice(0, DESCRIPTION_LIMIT))}
                         rows={3}
                         placeholder="A short blurb shown wherever this category appears."
-                        className="w-full resize-none rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50"
+                        className="w-full resize-none rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-4 focus:ring-moss/10"
                     />
                 </div>
 
-                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 transition hover:border-slate-300">
-                    <span className="text-sm text-slate-700">
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-line bg-linen/50 px-4 py-3 transition hover:border-clay/50">
+                    <span className="text-sm text-ink">
                         Show in <span className="font-medium">"Featured Categories"</span> on the homepage
                     </span>
                     <span className="relative inline-flex shrink-0 items-center">
@@ -148,21 +148,21 @@ export default function CategoryCreateForm({ onCreated }) {
                             onChange={(e) => handleChange("isFeatured", e.target.checked)}
                             className="peer sr-only"
                         />
-                        <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
-                        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+                        <span className="h-6 w-11 rounded-full bg-stone/30 transition peer-checked:bg-moss peer-focus-visible:ring-2 peer-focus-visible:ring-moss/40" />
+                        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition peer-checked:translate-x-5" />
                     </span>
                 </label>
             </div>
 
-            <div className="border-t border-slate-100 pt-6">
+            <div className="border-t border-line pt-6">
                 <CategoryFieldBuilder fields={fields} onChange={setFields} />
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:justify-end">
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-moss px-6 py-2.5 text-sm font-medium text-card transition hover:bg-moss/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {submitting && (
                         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">

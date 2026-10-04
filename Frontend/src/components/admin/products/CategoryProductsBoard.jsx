@@ -102,7 +102,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center gap-3 rounded-2xl border border-red-100 bg-red-50/60 px-6 py-10 text-center">
+            <div className="flex flex-col items-center gap-3 rounded-3xl border border-red-100 bg-red-50/60 px-6 py-10 text-center">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-100">
                     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-red-600">
                         <path
@@ -117,7 +117,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                 <p className="text-sm font-medium text-red-700">{error}</p>
                 <button
                     onClick={load}
-                    className="rounded-full bg-red-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 active:scale-[0.97]"
+                    className="rounded-full bg-moss px-5 py-1.5 text-sm font-medium text-card transition hover:bg-moss/90 active:scale-[0.97]"
                 >
                     Try again
                 </button>
@@ -127,13 +127,14 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
 
     return (
         <div className="space-y-6">
-            {/* Toolbar */}
-            <div className="sticky top-0 z-10 -mx-4 space-y-4 border-b border-slate-200/70 bg-white/85 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:rounded-2xl sm:border sm:px-5 sm:shadow-sm">
+            {/* Toolbar. top-14/16 sits just under the sticky topbar (document-scroll layout);
+                use top-0 instead if the page content scrolls inside its own container. */}
+            <div className="sticky top-14 z-10 -mx-4 space-y-4 border-b border-line bg-card/85 px-4 py-4 backdrop-blur-md sm:top-16 sm:mx-0 sm:rounded-3xl sm:border sm:px-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Products by category</h2>
+                        <h2 className="font-display text-xl font-semibold text-ink">Products by category</h2>
                         {!loading && (
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-stone">
                                 {totalVisible} product{totalVisible === 1 ? "" : "s"} shown
                             </p>
                         )}
@@ -143,7 +144,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                         <svg
                             viewBox="0 0 24 24"
                             fill="none"
-                            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                            className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone"
                         >
                             <path
                                 d="M21 21l-4.3-4.3m1.8-5.2a7 7 0 11-14 0 7 7 0 0114 0z"
@@ -157,7 +158,7 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Search products…"
-                            className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                            className="w-full rounded-full border border-line bg-card py-2 pl-10 pr-3 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-2 focus:ring-moss/15"
                         />
                     </div>
                 </div>
@@ -168,8 +169,8 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                         onClick={() => setActiveCategoryFilter("all")}
                         className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
                             activeCategoryFilter === "all"
-                                ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                ? "bg-moss text-card"
+                                : "bg-linen text-stone hover:bg-line hover:text-ink"
                         }`}
                     >
                         All ({products.length})
@@ -184,8 +185,8 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                                 onClick={() => setActiveCategoryFilter(c._id)}
                                 className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
                                     active
-                                        ? "bg-indigo-600 text-white shadow-sm"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        ? "bg-moss text-card"
+                                        : "bg-linen text-stone hover:bg-line hover:text-ink"
                                 } ${!c.isActive ? "opacity-60" : ""}`}
                             >
                                 {c.name} ({count})
@@ -204,12 +205,12 @@ export default function CategoryProductsBoard({ refreshKey, onEditProduct }) {
                 sections.map(({ category, items }) => (
                     <section key={category._id}>
                         <div className="mb-3 flex flex-wrap items-baseline gap-2">
-                            <h3 className="text-sm font-semibold text-slate-700">{category.name}</h3>
-                            <span className="text-xs text-slate-400">
+                            <h3 className="font-display text-xl font-semibold text-ink">{category.name}</h3>
+                            <span className="text-xs text-stone">
                                 {items.length} product{items.length === 1 ? "" : "s"}
                             </span>
                             {!category.isActive && (
-                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                                <span className="rounded-full bg-clay/15 px-2 py-0.5 text-xs font-medium text-clay-deep">
                                     Category inactive
                                 </span>
                             )}
@@ -237,13 +238,13 @@ function SkeletonBoard() {
         <div className="space-y-8 animate-pulse">
             {[0, 1].map((section) => (
                 <div key={section}>
-                    <div className="mb-3 h-4 w-32 rounded bg-slate-200" />
+                    <div className="mb-3 h-4 w-32 rounded-full bg-linen" />
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
                         {Array.from({ length: 5 }).map((_, i) => (
-                            <div key={i} className="space-y-2 rounded-xl border border-slate-100 p-2">
-                                <div className="aspect-square w-full rounded-lg bg-slate-200" />
-                                <div className="h-3 w-4/5 rounded bg-slate-200" />
-                                <div className="h-3 w-1/2 rounded bg-slate-100" />
+                            <div key={i} className="space-y-2 rounded-3xl border border-line bg-card p-2">
+                                <div className="aspect-[4/3] w-full rounded-2xl bg-linen" />
+                                <div className="h-3 w-4/5 rounded-full bg-linen" />
+                                <div className="h-3 w-1/2 rounded-full bg-linen/70" />
                             </div>
                         ))}
                     </div>
@@ -255,9 +256,9 @@ function SkeletonBoard() {
 
 function EmptyState({ hasQuery }) {
     return (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 py-16 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-                <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-slate-400">
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-line bg-linen/40 py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linen">
+                <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-clay">
                     <path
                         d="M3 7l1.4-2.8A2 2 0 016.2 3h11.6a2 2 0 011.8 1.2L21 7M3 7h18M3 7v11a2 2 0 002 2h14a2 2 0 002-2V7M9 11a3 3 0 006 0"
                         stroke="currentColor"
@@ -267,10 +268,10 @@ function EmptyState({ hasQuery }) {
                     />
                 </svg>
             </div>
-            <p className="text-sm font-medium text-slate-600">
+            <p className="text-sm font-medium text-ink">
                 {hasQuery ? "No products match your search" : "No products yet"}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone">
                 {hasQuery ? "Try a different name or clear the search." : "Products you add will show up here, grouped by category."}
             </p>
         </div>

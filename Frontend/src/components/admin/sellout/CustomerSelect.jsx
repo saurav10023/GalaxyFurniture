@@ -16,7 +16,7 @@ import { IconSearch, IconUser, IconClose } from "../icons/AdminIcons";
 const PHONE_REGEX = /^[0-9]{10}$/;
 
 const fieldClasses =
-    "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500";
+    "w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-sm text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
 
 export default function CustomerSelect({ onChange }) {
     const [mode, setMode] = useState("existing");
@@ -83,27 +83,20 @@ export default function CustomerSelect({ onChange }) {
         onChange(null);
     };
 
+    const toggleClasses = (active) =>
+        `px-3.5 py-1 rounded-full text-xs font-medium transition-colors ${
+            active ? "bg-card text-ink shadow-sm" : "text-stone hover:text-ink"
+        }`;
+
     return (
         <div>
             <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-slate-700">Customer</label>
-                <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
-                    <button
-                        type="button"
-                        onClick={() => switchMode("existing")}
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                            mode === "existing" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                        }`}
-                    >
+                <label className="block text-sm font-medium text-ink">Customer</label>
+                <div className="inline-flex rounded-full p-0.5 bg-linen">
+                    <button type="button" onClick={() => switchMode("existing")} className={toggleClasses(mode === "existing")}>
                         Existing
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => switchMode("new")}
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                            mode === "new" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                        }`}
-                    >
+                    <button type="button" onClick={() => switchMode("new")} className={toggleClasses(mode === "new")}>
                         New
                     </button>
                 </div>
@@ -111,16 +104,16 @@ export default function CustomerSelect({ onChange }) {
 
             {mode === "existing" ? (
                 selected ? (
-                    <div className="flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-2.5">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-3 rounded-2xl border border-moss/25 bg-moss/5 px-3 py-2.5">
+                        <div className="h-9 w-9 rounded-full bg-moss/10 text-moss font-display text-lg font-semibold flex items-center justify-center shrink-0">
                             {selected.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-slate-800 truncate">{selected.name}</div>
-                            <div className="text-xs text-slate-500">
+                            <div className="text-sm font-medium text-ink truncate">{selected.name}</div>
+                            <div className="text-xs text-stone">
                                 {selected.phone}
                                 {selected.pendingBalance > 0 && (
-                                    <span className="ml-1.5 text-amber-600">
+                                    <span className="ml-1.5 text-clay-deep">
                                         · owes ₹{selected.pendingBalance.toLocaleString("en-IN")}
                                     </span>
                                 )}
@@ -129,7 +122,7 @@ export default function CustomerSelect({ onChange }) {
                         <button
                             type="button"
                             onClick={clearSelection}
-                            className="text-slate-400 hover:text-slate-600 p-1 shrink-0"
+                            className="text-stone hover:text-ink hover:bg-linen p-1.5 rounded-full shrink-0 transition-colors"
                             aria-label="Clear customer"
                         >
                             <IconClose className="h-4 w-4" />
@@ -137,34 +130,34 @@ export default function CustomerSelect({ onChange }) {
                     </div>
                 ) : (
                     <div className="relative">
-                        <IconSearch className="h-4 w-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <IconSearch className="h-4 w-4 text-stone absolute left-3.5 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Search by name or phone…"
-                            className={`${fieldClasses} pl-9`}
+                            className={`${fieldClasses} pl-10`}
                         />
-                        {searching && <p className="text-xs text-slate-400 mt-1.5">Searching…</p>}
+                        {searching && <p className="text-xs text-stone mt-1.5">Searching…</p>}
                         {results.length > 0 && (
-                            <ul className="absolute z-10 w-full mt-1 rounded-lg border border-slate-200 bg-white shadow-md max-h-52 overflow-auto">
+                            <ul className="absolute z-10 w-full mt-1.5 rounded-2xl border border-line bg-card/95 backdrop-blur-xl shadow-[0_12px_32px_-12px_rgba(42,37,31,0.25)] max-h-52 overflow-auto p-1.5">
                                 {results.map((c) => (
                                     <li key={c._id}>
                                         <button
                                             type="button"
                                             onClick={() => pickCustomer(c)}
-                                            className="w-full flex items-center gap-2.5 text-left px-3 py-2 text-sm hover:bg-slate-50"
+                                            className="w-full flex items-center gap-2.5 text-left px-3 py-2 text-sm rounded-xl hover:bg-linen"
                                         >
-                                            <IconUser className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                                            <span className="text-slate-800">{c.name}</span>
-                                            <span className="text-slate-400">· {c.phone}</span>
+                                            <IconUser className="h-3.5 w-3.5 text-clay shrink-0" />
+                                            <span className="text-ink">{c.name}</span>
+                                            <span className="text-stone">· {c.phone}</span>
                                         </button>
                                     </li>
                                 ))}
                             </ul>
                         )}
                         {!searching && query.trim() && results.length === 0 && (
-                            <p className="text-xs text-slate-400 mt-1.5">
+                            <p className="text-xs text-stone mt-1.5">
                                 No match — switch to "New" to add {query}.
                             </p>
                         )}
@@ -193,7 +186,7 @@ export default function CustomerSelect({ onChange }) {
                         className={fieldClasses}
                     />
                     {phone && !PHONE_REGEX.test(phone) && (
-                        <p className="sm:col-span-2 text-xs text-red-500">Enter a valid 10-digit mobile number.</p>
+                        <p className="sm:col-span-2 text-xs text-red-700">Enter a valid 10-digit mobile number.</p>
                     )}
                 </div>
             )}

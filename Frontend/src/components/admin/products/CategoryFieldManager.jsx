@@ -7,6 +7,7 @@
 // under the old one.
 
 import { useState } from "react";
+import Select from "../../ui/Select";
 import { addCategoryField, updateCategoryField, removeCategoryField } from "../../../api/admin/categories.api";
 
 const FIELD_TYPES = ["text", "number", "decimal", "boolean", "select", "multiselect", "date", "textarea", "url", "color"];
@@ -26,10 +27,13 @@ const TYPE_LABELS = {
     color: "Color"
 };
 
+const TYPE_OPTIONS = FIELD_TYPES.map((t) => ({ value: t, label: TYPE_LABELS[t] }));
+
 const slugify = (s) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 
 const inputClass =
-    "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50";
+    "w-full rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-2 focus:ring-moss/15";
+const labelClass = "mb-1 block text-xs font-medium text-stone";
 
 function emptyDraft() {
     return { name: "", key: "", type: "text", required: false, options: "", min: "", max: "" };
@@ -74,10 +78,10 @@ function draftToPayload(draft, { includeKey }) {
 
 function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, submitLabel }) {
     return (
-        <div className="space-y-3 rounded-lg border border-indigo-100 bg-indigo-50/40 p-3">
+        <div className="space-y-3 rounded-2xl border border-line bg-linen/50 p-3.5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Field name</label>
+                    <label className={labelClass}>Field name</label>
                     <input
                         type="text"
                         value={draft.name}
@@ -88,8 +92,8 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
                 </div>
                 {showKey && (
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">
-                            Key <span className="font-normal text-slate-400">(auto from name if left blank)</span>
+                        <label className={labelClass}>
+                            Key <span className="font-normal text-stone">(auto from name if left blank)</span>
                         </label>
                         <input
                             type="text"
@@ -104,25 +108,20 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-500">Type</label>
-                    <select
+                    <label className={labelClass}>Type</label>
+                    <Select
                         value={draft.type}
-                        onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
-                        className={inputClass}
-                    >
-                        {FIELD_TYPES.map((t) => (
-                            <option key={t} value={t}>
-                                {TYPE_LABELS[t]}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => setDraft((d) => ({ ...d, type: v }))}
+                        options={TYPE_OPTIONS}
+                        fullWidth
+                    />
                 </div>
-                <label className="flex items-center gap-2 self-end pb-1.5 text-sm text-slate-600">
+                <label className="flex items-center gap-2 self-end pb-2 text-sm text-stone">
                     <input
                         type="checkbox"
                         checked={draft.required}
                         onChange={(e) => setDraft((d) => ({ ...d, required: e.target.checked }))}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-line text-moss focus:ring-moss"
                     />
                     Required
                 </label>
@@ -130,8 +129,8 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
 
             {NEEDS_OPTIONS.includes(draft.type) && (
                 <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-500">
-                        Options <span className="font-normal text-slate-400">(comma-separated)</span>
+                    <label className={labelClass}>
+                        Options <span className="font-normal text-stone">(comma-separated)</span>
                     </label>
                     <input
                         type="text"
@@ -146,7 +145,7 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
             {NEEDS_RANGE.includes(draft.type) && (
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">Min (optional)</label>
+                        <label className={labelClass}>Min (optional)</label>
                         <input
                             type="number"
                             value={draft.min}
@@ -155,7 +154,7 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-500">Max (optional)</label>
+                        <label className={labelClass}>Max (optional)</label>
                         <input
                             type="number"
                             value={draft.max}
@@ -171,7 +170,7 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
                     type="button"
                     onClick={onCancel}
                     disabled={submitting}
-                    className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                    className="rounded-full px-3.5 py-1.5 text-xs font-medium text-stone transition hover:bg-linen hover:text-ink disabled:opacity-40"
                 >
                     Cancel
                 </button>
@@ -179,7 +178,7 @@ function FieldForm({ draft, setDraft, showKey, onSubmit, onCancel, submitting, s
                     type="button"
                     onClick={onSubmit}
                     disabled={submitting}
-                    className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded-full bg-moss px-4 py-1.5 text-xs font-medium text-card transition hover:bg-moss/90 disabled:opacity-50"
                 >
                     {submitting ? "Saving…" : submitLabel}
                 </button>
@@ -268,11 +267,11 @@ export default function CategoryFieldManager({ categoryId, fields, onFieldsChang
     return (
         <div className="space-y-3">
             {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>
+                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>
             )}
 
             {fields.length === 0 && !addingNew && (
-                <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 px-3 py-4 text-center text-xs text-slate-400">
+                <p className="rounded-2xl border border-dashed border-line bg-linen/40 px-3 py-4 text-center text-xs text-stone">
                     No custom fields yet for this category.
                 </p>
             )}
@@ -293,24 +292,24 @@ export default function CategoryFieldManager({ categoryId, fields, onFieldsChang
                     ) : (
                         <div
                             key={field.key}
-                            className="flex flex-col gap-2 rounded-md border border-slate-200 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+                            className="flex flex-col gap-2 rounded-2xl border border-line bg-card px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between"
                         >
                             <div className="min-w-0">
-                                <p className="truncate text-sm font-medium text-slate-700">
+                                <p className="truncate text-sm font-medium text-ink">
                                     {field.name}
-                                    {field.required && <span className="text-red-500"> *</span>}
+                                    {field.required && <span className="text-red-700"> *</span>}
                                 </p>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+                                    <span className="rounded-full bg-linen px-2 py-0.5 text-[11px] font-medium text-stone">
                                         {TYPE_LABELS[field.type] || field.type}
                                     </span>
                                     {field.key && (
-                                        <span className="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-500">
+                                        <span className="rounded-full bg-linen px-2 py-0.5 font-mono text-[11px] text-stone">
                                             {field.key}
                                         </span>
                                     )}
                                     {field.options?.length > 0 && (
-                                        <span className="truncate text-[11px] text-slate-400">
+                                        <span className="truncate text-[11px] text-stone">
                                             {field.options.join(", ")}
                                         </span>
                                     )}
@@ -320,7 +319,7 @@ export default function CategoryFieldManager({ categoryId, fields, onFieldsChang
                                 <button
                                     type="button"
                                     onClick={() => startEdit(field)}
-                                    className="text-xs font-medium text-indigo-600 transition hover:text-indigo-700"
+                                    className="text-xs font-medium text-moss transition hover:text-ink"
                                 >
                                     Edit
                                 </button>
@@ -328,7 +327,7 @@ export default function CategoryFieldManager({ categoryId, fields, onFieldsChang
                                     type="button"
                                     onClick={() => remove(field.key)}
                                     disabled={busyKey === field.key}
-                                    className="text-xs font-medium text-red-500 transition hover:text-red-600 disabled:opacity-50"
+                                    className="text-xs font-medium text-red-700 transition hover:text-red-800 disabled:opacity-50"
                                 >
                                     {busyKey === field.key ? "…" : "Remove"}
                                 </button>
@@ -356,7 +355,7 @@ export default function CategoryFieldManager({ categoryId, fields, onFieldsChang
                 <button
                     type="button"
                     onClick={() => setAddingNew(true)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 transition hover:text-indigo-700"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-moss transition hover:text-ink"
                 >
                     <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3">
                         <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

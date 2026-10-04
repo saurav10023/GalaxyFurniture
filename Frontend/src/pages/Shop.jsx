@@ -7,6 +7,15 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
 const PAGE_SIZE = 12;
 const SECTION_PREVIEW_SIZE = 6;
 
+// ---- liquid-glass surfaces ----------------------------------------------------
+const GLASS =
+  "bg-gradient-to-br from-white/75 to-white/30 backdrop-blur-xl backdrop-saturate-150 border border-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-1px_0_rgba(90,70,40,0.07),0_10px_28px_-14px_rgba(80,60,30,0.3)]";
+const GLASS_DARK =
+  "bg-gradient-to-br from-[#5A6450]/95 to-[#343C2E]/95 backdrop-blur-xl text-white border border-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_12px_26px_-12px_rgba(52,60,46,0.6)]";
+const RING =
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
+const LIFT = "transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]";
+
 // ---- shared safety helpers ------------------------------------------------
 // Same defensive rendering as ProductView.jsx — category/brand can come back
 // as a populated object ({ _id, name, fields, slug }) rather than a string,
@@ -66,36 +75,34 @@ const ProductCard = ({ product, className = "" }) => {
     <button
       type="button"
       onClick={() => navigate(`/product/${product._id}`)}
-      className={`group text-left rounded-2xl bg-[#2E2119] border border-[#3B2A22] overflow-hidden transition-all duration-200 hover:border-[#C9A66B]/40 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A66B] ${className}`}
+      className={`group text-left rounded-2xl overflow-hidden ${GLASS} ${LIFT} hover:border-moss/30 ${RING} ${className}`}
     >
-      <div className="relative aspect-square bg-gradient-to-br from-[#F6F1E7] via-[#FBF8F1] to-white flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-square bg-gradient-to-br from-white via-[#FBF8F1] to-linen flex items-center justify-center overflow-hidden">
         {product.images?.[0]?.url ? (
           <img
             src={product.images[0].url}
             alt={product.name}
-            className="w-[78%] h-[78%] object-contain transition-transform duration-500 group-hover:scale-105"
+            className="w-[80%] h-[80%] object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <Armchair className="w-12 h-12 text-[#9C7A45] stroke-[1]" />
+          <Armchair className="w-12 h-12 text-clay/70 stroke-[1]" />
         )}
         <span
-          className={`absolute top-2.5 left-2.5 font-mono text-[9px] uppercase tracking-wider rounded-full px-2.5 py-1 border ${
-            inStock
-              ? "text-[#9C7A45] bg-white/90 border-[#C9A66B]/30"
-              : "text-[#6B5B4F]/70 bg-white/70 border-black/5"
+          className={`absolute top-2.5 left-2.5 text-[10.5px] font-medium rounded-full px-2.5 py-1 ${GLASS} ${
+            inStock ? "text-moss" : "text-stone"
           }`}
         >
           {inStock ? "In stock" : "Made to order"}
         </span>
       </div>
-      <div className="p-3.5">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#C9A66B]/80 truncate">
+      <div className="p-3 sm:p-3.5">
+        <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-clay truncate">
           {displayName(product.brand)}
         </p>
-        <p className="font-serif text-[14.5px] text-[#F6F1E7] leading-snug mt-0.5 truncate">
+        <p className="font-serif text-[14.5px] sm:text-[15.5px] text-ink leading-snug mt-0.5 truncate">
           {product.name}
         </p>
-        <p className="font-mono text-[13.5px] text-[#C9A66B] mt-1.5">
+        <p className="text-[14px] font-semibold text-ink mt-1.5">
           {formatINR(product.pricing?.sellingPrice)}
         </p>
       </div>
@@ -104,13 +111,24 @@ const ProductCard = ({ product, className = "" }) => {
 };
 
 const ProductCardSkeleton = () => (
-  <div className="rounded-2xl bg-[#2E2119] border border-[#3B2A22] overflow-hidden">
-    <div className="aspect-square bg-white/5 animate-pulse" />
+  <div className={`rounded-2xl overflow-hidden ${GLASS}`}>
+    <div className="aspect-square bg-linen animate-pulse" />
     <div className="p-3.5 space-y-2">
-      <div className="h-2.5 w-16 rounded-full bg-white/10 animate-pulse" />
-      <div className="h-3.5 w-3/4 rounded-full bg-white/10 animate-pulse" />
-      <div className="h-3.5 w-1/3 rounded-full bg-white/10 animate-pulse" />
+      <div className="h-2.5 w-16 rounded-full bg-linen animate-pulse" />
+      <div className="h-3.5 w-3/4 rounded-full bg-linen animate-pulse" />
+      <div className="h-3.5 w-1/3 rounded-full bg-linen animate-pulse" />
     </div>
+  </div>
+);
+
+// Shared empty / error state
+const StateMessage = ({ title, hint }) => (
+  <div className="flex flex-col items-center justify-center text-center py-14 sm:py-20">
+    <span className={`w-16 h-16 rounded-full flex items-center justify-center ${GLASS}`}>
+      <Armchair className="w-8 h-8 text-clay stroke-[1.2]" />
+    </span>
+    <p className="mt-4 font-serif text-lg text-ink">{title}</p>
+    <p className="mt-1.5 text-[13.5px] text-stone">{hint}</p>
   </div>
 );
 
@@ -144,21 +162,21 @@ const CategorySection = ({ category }) => {
   if (!loading && products.length === 0) return null;
 
   return (
-    <section className="mb-14">
-      <div className="flex items-end justify-between gap-4 mb-5">
-        <h2 className="font-serif text-[1.4rem] sm:text-[1.6rem] text-[#F6F1E7]">
+    <section className="mb-10 sm:mb-12">
+      <div className="flex items-center justify-between gap-4 mb-4 sm:mb-5">
+        <h2 className="font-serif font-medium text-[1.4rem] sm:text-[1.7rem] text-ink">
           {category.name}
         </h2>
         <Link
           to={`/shop?category=${category.slug}`}
-          className="shrink-0 inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wider text-[#C9A66B]/80 hover:text-[#C9A66B] transition-colors"
+          className={`shrink-0 inline-flex items-center gap-1.5 rounded-full text-[13px] font-medium text-ink px-3.5 py-1.5 ${GLASS} ${LIFT} ${RING}`}
         >
           View all
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {loading
           ? Array.from({ length: SECTION_PREVIEW_SIZE }).map((_, i) => <ProductCardSkeleton key={i} />)
           : products.map((p) => <ProductCard key={p._id} product={p} />)}
@@ -270,69 +288,77 @@ const Shop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#241A14] to-[#1A130E]">
-      <div className="pointer-events-none fixed -top-24 right-[-10%] w-[36rem] h-[36rem] rounded-full bg-[#C9A66B]/10 blur-[120px]" />
-      <div className="pointer-events-none fixed bottom-[-15%] left-[-10%] w-[28rem] h-[28rem] rounded-full bg-[#C9A66B]/5 blur-[100px]" />
+  // category pill styles
+  const pillBase = `shrink-0 px-4 py-2 rounded-full text-[13.5px] font-medium ${LIFT} ${RING}`;
+  const pillIdle = `text-ink/80 hover:text-ink ${GLASS}`;
+  const pillActive = GLASS_DARK;
 
-      <div className="relative max-w-7xl mx-auto px-5 sm:px-6 md:px-10 pt-10 sm:pt-12 pb-20">
+  const pageBtn =
+    `w-10 h-10 rounded-full flex items-center justify-center text-ink/80 hover:text-moss ${GLASS} ${LIFT} ${RING} ` +
+    "disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:text-ink/80";
+
+  return (
+    <div className="relative min-h-screen bg-paper overflow-x-clip">
+      {/* soft light fields so the glass has something to bend */}
+      <div className="pointer-events-none fixed -top-24 right-[-10%] w-[34rem] h-[34rem] rounded-full bg-[#E3D3B8]/70 blur-[110px]" />
+      <div className="pointer-events-none fixed top-1/2 left-[-12%] w-[26rem] h-[26rem] rounded-full bg-[#D3D9C5]/70 blur-[100px]" />
+      <div className="pointer-events-none fixed bottom-[-15%] right-[25%] w-[24rem] h-[24rem] rounded-full bg-[#EBDDC6]/70 blur-[100px]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-10 pt-8 sm:pt-10 pb-16 sm:pb-20">
         {/* header */}
-        <div className="mb-8">
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[#C9A66B]">
+        <div className="mb-5 sm:mb-6">
+          <p className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-stone">
+            <span className="h-px w-8 bg-clay" />
             The showroom
-          </span>
-          <h1 className="mt-2 font-serif text-[1.9rem] sm:text-[2.3rem] text-[#F6F1E7]">
+          </p>
+          <h1 className="mt-3 font-serif font-medium text-[1.8rem] sm:text-[2.4rem] lg:text-[2.7rem] leading-[1.08] text-ink">
             Browse every piece on the floor
           </h1>
         </div>
 
         {/* search */}
-        <form onSubmit={handleSearchSubmit} className="relative max-w-lg mb-6">
-          <div className="flex items-center gap-2.5 bg-black/25 border border-[#C9A66B]/30 rounded-full pl-4 pr-1.5 py-1.5 focus-within:border-[#C9A66B]/60 transition-colors">
-            <SearchIcon className="w-[17px] h-[17px] text-[#F6F1E7]/50 shrink-0" />
+        <form onSubmit={handleSearchSubmit} className="relative max-w-lg mb-4 sm:mb-5">
+          <div className={`flex items-center gap-2.5 rounded-full pl-4 pr-1.5 py-1.5 focus-within:border-moss/40 transition-colors ${GLASS}`}>
+            <SearchIcon className="w-[17px] h-[17px] text-stone shrink-0" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search sofas, beds, decor…"
-              className="flex-1 bg-transparent text-[14px] text-[#F6F1E7] placeholder:text-[#F6F1E7]/40 focus:outline-none py-2"
+              className="flex-1 min-w-0 bg-transparent text-[14px] text-ink placeholder:text-stone/70 focus:outline-none py-2"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={clearSearch}
                 aria-label="Clear search"
-                className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-[#F6F1E7]/50 hover:text-[#F6F1E7] hover:bg-white/10 transition-colors"
+                className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-stone hover:text-ink hover:bg-ink/5 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
             <button
               type="submit"
-              className="shrink-0 rounded-full bg-gradient-to-r from-[#C9A66B] to-[#9C7A45] text-[#241A14] text-[13px] font-semibold px-4 py-2 transition-transform duration-150 hover:-translate-y-0.5"
+              className={`shrink-0 rounded-full text-[13px] font-medium px-4 py-2 ${GLASS_DARK} ${LIFT}`}
             >
               Search
             </button>
           </div>
         </form>
 
-        {/* category pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-10">
+        {/* category pills: one scrolling row on phones, wrapping row on larger screens */}
+        <div className="-mx-4 px-4 sm:mx-0 sm:px-0 mb-7 sm:mb-9 flex items-center gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
             onClick={() => selectCategory("")}
-            className={`px-4 py-2 rounded-full text-[13.5px] font-medium border transition-colors duration-150 ${
-              !categorySlug
-                ? "bg-[#C9A66B] text-[#241A14] border-[#C9A66B]"
-                : "text-[#F6F1E7]/75 border-[#3B2A22] hover:border-[#C9A66B]/40 hover:text-[#F6F1E7]"
-            }`}
+            className={`${pillBase} ${!categorySlug ? pillActive : pillIdle}`}
           >
             All pieces
           </button>
 
           {categoriesLoading &&
             Array.from({ length: 4 }).map((_, i) => (
-              <span key={i} className="h-9 w-20 rounded-full bg-white/5 animate-pulse" />
+              <span key={i} className="shrink-0 h-9 w-20 rounded-full bg-linen animate-pulse" />
             ))}
 
           {!categoriesLoading &&
@@ -341,33 +367,29 @@ const Shop = () => {
                 key={cat._id || cat.slug}
                 type="button"
                 onClick={() => selectCategory(cat.slug)}
-                className={`px-4 py-2 rounded-full text-[13.5px] font-medium border transition-colors duration-150 ${
-                  categorySlug === cat.slug
-                    ? "bg-[#C9A66B] text-[#241A14] border-[#C9A66B]"
-                    : "text-[#F6F1E7]/75 border-[#3B2A22] hover:border-[#C9A66B]/40 hover:text-[#F6F1E7]"
-                }`}
+                className={`${pillBase} ${categorySlug === cat.slug ? pillActive : pillIdle}`}
               >
                 {cat.name}
               </button>
             ))}
 
           {!categoriesLoading && categoriesError && (
-            <span className="text-[13px] text-[#E27D64] italic px-1">Couldn't load categories</span>
+            <span className="shrink-0 text-[13px] text-[#B5533A] italic px-1">Couldn't load categories</span>
           )}
         </div>
 
         {/* ---- filtered / search results view ---- */}
         {isFiltering ? (
           <div>
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <p className="text-[13.5px] text-[#F6F1E7]/55">
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <p className="text-[13.5px] text-stone">
                 {searchQuery ? (
                   <>
-                    Results for <span className="text-[#F6F1E7]">"{searchQuery}"</span>
+                    Results for <span className="text-ink font-medium">"{searchQuery}"</span>
                   </>
                 ) : activeCategory ? (
                   <>
-                    Showing <span className="text-[#F6F1E7]">{activeCategory.name}</span>
+                    Showing <span className="text-ink font-medium">{activeCategory.name}</span>
                   </>
                 ) : (
                   "Showing filtered pieces"
@@ -377,14 +399,14 @@ const Shop = () => {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-[#F6F1E7]/45 hover:text-[#C9A66B] transition-colors"
+                className={`shrink-0 rounded-full text-[12.5px] font-medium text-ink/80 hover:text-moss px-3.5 py-1.5 ${GLASS} ${LIFT} ${RING}`}
               >
                 Clear filters
               </button>
             </div>
 
             {loading && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                 {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
@@ -392,41 +414,33 @@ const Shop = () => {
             )}
 
             {!loading && errored && (
-              <div className="flex flex-col items-center justify-center text-center py-20">
-                <Armchair className="w-14 h-14 text-[#C9A66B]/50 stroke-[1]" />
-                <p className="mt-4 font-serif text-lg text-[#F6F1E7]">Something went wrong loading the catalog.</p>
-                <p className="mt-1.5 text-[13.5px] text-[#F6F1E7]/50">Try again in a moment.</p>
-              </div>
+              <StateMessage title="Something went wrong loading the catalog." hint="Try again in a moment." />
             )}
 
             {!loading && !errored && products.length === 0 && (
-              <div className="flex flex-col items-center justify-center text-center py-20">
-                <Armchair className="w-14 h-14 text-[#C9A66B]/50 stroke-[1]" />
-                <p className="mt-4 font-serif text-lg text-[#F6F1E7]">Nothing matches that yet.</p>
-                <p className="mt-1.5 text-[13.5px] text-[#F6F1E7]/50">Try a different search or browse by category.</p>
-              </div>
+              <StateMessage title="Nothing matches that yet." hint="Try a different search or browse by category." />
             )}
 
             {!loading && !errored && products.length > 0 && (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                   {products.map((p) => (
                     <ProductCard key={p._id} product={p} />
                   ))}
                 </div>
 
                 {pagination.pages > 1 && (
-                  <div className="flex items-center justify-center gap-3 mt-10">
+                  <div className="flex items-center justify-center gap-3 mt-8 sm:mt-10">
                     <button
                       type="button"
                       onClick={() => updateParams({ page: Math.max(1, page - 1) })}
                       disabled={page <= 1}
                       aria-label="Previous page"
-                      className="w-10 h-10 rounded-full border border-[#3B2A22] flex items-center justify-center text-[#F6F1E7]/70 hover:text-[#C9A66B] hover:border-[#C9A66B]/40 disabled:opacity-30 disabled:hover:text-[#F6F1E7]/70 disabled:hover:border-[#3B2A22] transition-colors"
+                      className={pageBtn}
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="font-mono text-[12.5px] text-[#F6F1E7]/60">
+                    <span className={`rounded-full px-4 py-2 text-[12.5px] text-stone ${GLASS}`}>
                       Page {pagination.page || page} of {pagination.pages}
                     </span>
                     <button
@@ -434,7 +448,7 @@ const Shop = () => {
                       onClick={() => updateParams({ page: Math.min(pagination.pages, page + 1) })}
                       disabled={page >= pagination.pages}
                       aria-label="Next page"
-                      className="w-10 h-10 rounded-full border border-[#3B2A22] flex items-center justify-center text-[#F6F1E7]/70 hover:text-[#C9A66B] hover:border-[#C9A66B]/40 disabled:opacity-30 disabled:hover:text-[#F6F1E7]/70 disabled:hover:border-[#3B2A22] transition-colors"
+                      className={pageBtn}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -447,11 +461,11 @@ const Shop = () => {
           /* ---- default sectioned browsing view ---- */
           <div>
             {categoriesLoading && (
-              <div className="space-y-14">
+              <div className="space-y-10">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i}>
-                    <div className="h-6 w-32 rounded-full bg-white/10 animate-pulse mb-5" />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="h-6 w-32 rounded-full bg-linen animate-pulse mb-4" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                       {Array.from({ length: SECTION_PREVIEW_SIZE }).map((_, j) => (
                         <ProductCardSkeleton key={j} />
                       ))}
@@ -462,19 +476,11 @@ const Shop = () => {
             )}
 
             {!categoriesLoading && categoriesError && (
-              <div className="flex flex-col items-center justify-center text-center py-20">
-                <Armchair className="w-14 h-14 text-[#C9A66B]/50 stroke-[1]" />
-                <p className="mt-4 font-serif text-lg text-[#F6F1E7]">Couldn't load the showroom.</p>
-                <p className="mt-1.5 text-[13.5px] text-[#F6F1E7]/50">Check your connection and try again.</p>
-              </div>
+              <StateMessage title="Couldn't load the showroom." hint="Check your connection and try again." />
             )}
 
             {!categoriesLoading && !categoriesError && categories.length === 0 && (
-              <div className="flex flex-col items-center justify-center text-center py-20">
-                <Armchair className="w-14 h-14 text-[#C9A66B]/50 stroke-[1]" />
-                <p className="mt-4 font-serif text-lg text-[#F6F1E7]">No categories yet.</p>
-                <p className="mt-1.5 text-[13.5px] text-[#F6F1E7]/50">Check back once the showroom is stocked.</p>
-              </div>
+              <StateMessage title="No categories yet." hint="Check back once the showroom is stocked." />
             )}
 
             {!categoriesLoading &&

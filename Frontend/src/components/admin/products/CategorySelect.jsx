@@ -1,12 +1,13 @@
 // src/components/admin/products/CategorySelect.jsx
 //
-// Fetches active categories once and renders a <select>. Category docs
+// Fetches active categories once and renders the themed Select. Category docs
 // already include their `fields` array (Category.find returns full docs),
 // so the parent gets everything it needs from onChange without a second
 // request — no need to call getCategory(id) separately.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAllCategories } from "../../../api/admin/categories.api";
+import Select from "../../ui/Select";
 
 // value: currently selected category id (or "")
 // onChange: (categoryId, categoryDoc | null) => void
@@ -38,42 +39,30 @@ export default function CategorySelect({ value, onChange, includeInactive = fals
         };
     }, [includeInactive]);
 
-    const handleChange = (e) => {
-        const id = e.target.value;
+    const options = useMemo(
+        () => categories.map((cat) => ({ value: cat._id, label: cat.name })),
+        [categories]
+    );
+
+    const handleChange = (id) => {
         const doc = categories.find((c) => c._id === id) || null;
         onChange(id, doc);
     };
 
     return (
         <div>
-            {label && <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>}
-            <div className="relative">
-                <select
-                    value={value || ""}
-                    onChange={handleChange}
-                    disabled={loading}
-                    className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-9 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50 disabled:bg-slate-50 disabled:text-slate-400"
-                >
-                    <option value="" disabled>
-                        {loading ? "Loading categories…" : "Select a category"}
-                    </option>
-                    {categories.map((cat) => (
-                        <option key={cat._id} value={cat._id}>
-                            {cat.name}
-                        </option>
-                    ))}
-                </select>
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                >
-                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </div>
-            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+            {label && <label className="mb-1.5 block text-sm font-medium text-ink">{label}</label>}
+            <Select
+                value={value || ""}
+                onChange={handleChange}
+                options={options}
+                placeholder={loading ? "Loading categories…" : "Select a category"}
+                disabled={loading}
+                fullWidth
+            />
+            {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
             {!loading && categories.length === 0 && !error && (
-                <p className="mt-1 text-xs text-slate-400">No categories yet — create one first.</p>
+                <p className="mt-1 text-xs text-stone">No categories yet — create one first.</p>
             )}
         </div>
     );

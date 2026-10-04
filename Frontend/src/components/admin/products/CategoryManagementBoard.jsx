@@ -11,12 +11,12 @@ function CategorySkeleton() {
     return (
         <div className="space-y-2 animate-pulse">
             {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3.5">
+                <div key={i} className="flex items-center justify-between rounded-2xl border border-line bg-card px-4 py-3.5">
                     <div className="space-y-2">
-                        <div className="h-3.5 w-32 rounded bg-slate-200" />
-                        <div className="h-3 w-48 rounded bg-slate-100" />
+                        <div className="h-3.5 w-32 rounded-full bg-linen" />
+                        <div className="h-3 w-48 rounded-full bg-linen/70" />
                     </div>
-                    <div className="h-3 w-10 rounded bg-slate-100" />
+                    <div className="h-3 w-10 rounded-full bg-linen/70" />
                 </div>
             ))}
         </div>
@@ -54,7 +54,7 @@ export default function CategoryManagementBoard({ refreshKey, onEditCategory }) 
 
     if (error) {
         return (
-            <div className="rounded-xl border border-red-100 bg-red-50/60 px-4 py-6 text-center text-sm text-red-700">
+            <div className="rounded-2xl border border-red-100 bg-red-50/60 px-4 py-6 text-center text-sm text-red-700">
                 {error}
             </div>
         );
@@ -62,9 +62,9 @@ export default function CategoryManagementBoard({ refreshKey, onEditCategory }) 
 
     if (categories.length === 0) {
         return (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-10 text-center">
-                <p className="text-sm font-medium text-slate-600">No categories yet</p>
-                <p className="mt-1 text-xs text-slate-400">Create one using the form to start organizing products.</p>
+            <div className="rounded-2xl border border-dashed border-line bg-linen/40 px-4 py-10 text-center">
+                <p className="text-sm font-medium text-ink">No categories yet</p>
+                <p className="mt-1 text-xs text-stone">Create one using the form to start organizing products.</p>
             </div>
         );
     }
@@ -76,27 +76,27 @@ export default function CategoryManagementBoard({ refreshKey, onEditCategory }) 
                 return (
                     <div
                         key={category._id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 transition hover:border-slate-300 hover:shadow-sm"
+                        className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-card px-4 py-3.5 transition hover:border-clay/50 hover:shadow-[0_8px_24px_-16px_rgba(42,37,31,0.3)]"
                     >
                         <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-1.5">
-                                <p className="truncate text-sm font-medium text-slate-800">{category.name}</p>
+                                <p className="truncate font-display text-lg font-semibold text-ink">{category.name}</p>
                                 {category.isFeatured && (
-                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                                    <span className="rounded-full bg-clay/15 px-2 py-0.5 text-[10px] font-medium text-clay-deep">
                                         Featured
                                     </span>
                                 )}
                                 {!category.isActive && (
-                                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                    <span className="rounded-full bg-linen px-2 py-0.5 text-[10px] font-medium text-stone">
                                         Deactivated
                                     </span>
                                 )}
                             </div>
                             {category.description && (
-                                <p className="mt-0.5 truncate text-xs text-slate-400">{category.description}</p>
+                                <p className="mt-0.5 truncate text-xs text-stone">{category.description}</p>
                             )}
-                            <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
-                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3">
+                            <p className="mt-1 flex items-center gap-1 text-xs text-stone">
+                                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 text-clay">
                                     <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                                 </svg>
                                 {fieldCount} custom field{fieldCount === 1 ? "" : "s"}
@@ -105,7 +105,7 @@ export default function CategoryManagementBoard({ refreshKey, onEditCategory }) 
                         <button
                             type="button"
                             onClick={() => onEditCategory(category)}
-                            className="shrink-0 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition hover:bg-indigo-100"
+                            className="shrink-0 rounded-full bg-moss/10 px-3.5 py-1.5 text-xs font-medium text-moss transition hover:bg-moss/15"
                         >
                             Edit
                         </button>

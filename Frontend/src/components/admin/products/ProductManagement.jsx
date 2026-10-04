@@ -35,23 +35,23 @@ export default function ProductManagement() {
     const bump = () => setRefreshKey((k) => k + 1);
 
     return (
-        <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-6xl space-y-6 p-4 text-ink sm:p-6 lg:p-8">
             <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-indigo-600">Catalog</span>
-                <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">Products &amp; categories</h1>
-                <p className="text-sm text-slate-500">Manage everything customers see in your store.</p>
+                <span className="text-xs font-medium uppercase tracking-[0.2em] text-clay-deep">Catalog</span>
+                <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Products &amp; categories</h1>
+                <p className="text-sm text-stone">Manage everything customers see in your store.</p>
             </div>
 
             {/* Segmented tab control — same everywhere, but content below reflows per breakpoint */}
-            <div className="flex gap-1.5 overflow-x-auto rounded-full bg-slate-100 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:inline-flex sm:w-auto">
+            <div className="flex gap-1.5 overflow-x-auto rounded-full bg-linen p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:inline-flex sm:w-auto">
                 {TABS.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ${
                             activeTab === tab.key
-                                ? "bg-white text-indigo-600 shadow-sm"
-                                : "text-slate-500 hover:text-slate-700"
+                                ? "bg-moss text-card"
+                                : "text-stone hover:text-ink"
                         }`}
                     >
                         {tab.label}
@@ -80,7 +80,7 @@ export default function ProductManagement() {
                         <CategoryCreateForm onCreated={bump} />
                     </div>
                     <div className="space-y-3 lg:col-span-3">
-                        <h2 className="text-sm font-semibold text-slate-700">Existing categories</h2>
+                        <h2 className="font-display text-xl font-semibold text-ink">Existing categories</h2>
                         <CategoryManagementBoard refreshKey={refreshKey} onEditCategory={setEditingCategory} />
                     </div>
                 </div>

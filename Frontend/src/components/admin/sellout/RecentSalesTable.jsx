@@ -4,15 +4,15 @@ import { getAllSales } from "../../../api/admin/sellout.api";
 import { IconInbox } from "../icons/AdminIcons";
 
 const STATUS_STYLES = {
-    paid: "bg-emerald-50 text-emerald-700",
-    partially_paid: "bg-amber-50 text-amber-700",
+    paid: "bg-moss/10 text-moss",
+    partially_paid: "bg-clay/15 text-clay-deep",
     pending: "bg-rose-50 text-rose-700"
 };
 
 const STATUS_DOTS = {
-    paid: "bg-emerald-500",
-    partially_paid: "bg-amber-500",
-    pending: "bg-rose-500"
+    paid: "bg-moss",
+    partially_paid: "bg-clay",
+    pending: "bg-rose-600"
 };
 
 const STATUS_LABELS = {
@@ -87,19 +87,19 @@ export default function RecentSalesTable({ refreshKey }) {
     }, [refreshKey]);
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div className="px-4 sm:px-5 py-4 border-b border-slate-100">
-                <h2 className="text-sm font-semibold text-slate-900">Recent sales</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Last 10 checkouts, most recent first.</p>
+        <div className="rounded-3xl border border-line bg-card overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-line">
+                <h2 className="font-display text-xl font-semibold text-ink">Recent sales</h2>
+                <p className="text-xs text-stone mt-0.5">Last 10 checkouts, most recent first.</p>
             </div>
 
             {loading ? (
-                <div className="px-5 py-14 text-sm text-slate-500 text-center">Loading recent sales…</div>
+                <div className="px-5 py-14 text-sm text-stone text-center">Loading recent sales…</div>
             ) : error ? (
-                <div className="px-5 py-14 text-sm text-rose-600 text-center">{error}</div>
+                <div className="px-5 py-14 text-sm text-rose-700 text-center">{error}</div>
             ) : sales.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 text-slate-400 py-14">
-                    <IconInbox className="h-8 w-8" />
+                <div className="flex flex-col items-center gap-2 text-stone py-14">
+                    <IconInbox className="h-8 w-8 text-clay" />
                     <span className="text-sm">No sales recorded yet. New checkouts will show up here.</span>
                 </div>
             ) : (
@@ -108,43 +108,43 @@ export default function RecentSalesTable({ refreshKey }) {
                     <div className="hidden md:block overflow-x-auto">
                         <table className="min-w-full text-sm">
                             <thead>
-                                <tr className="text-left text-xs font-medium text-slate-500 uppercase tracking-wide bg-slate-50">
-                                    <th className="px-5 py-2.5">Invoice</th>
-                                    <th className="px-5 py-2.5">Customer</th>
-                                    <th className="px-5 py-2.5">Items</th>
-                                    <th className="px-5 py-2.5 text-right">Billed</th>
-                                    <th className="px-5 py-2.5 text-right">Paid</th>
-                                    <th className="px-5 py-2.5 text-right">Due</th>
-                                    <th className="px-5 py-2.5">Status</th>
-                                    <th className="px-5 py-2.5">Date</th>
+                                <tr className="text-left text-[11px] font-medium text-stone uppercase tracking-[0.15em] bg-linen/60">
+                                    <th className="px-6 py-3">Invoice</th>
+                                    <th className="px-6 py-3">Customer</th>
+                                    <th className="px-6 py-3">Items</th>
+                                    <th className="px-6 py-3 text-right">Billed</th>
+                                    <th className="px-6 py-3 text-right">Paid</th>
+                                    <th className="px-6 py-3 text-right">Due</th>
+                                    <th className="px-6 py-3">Status</th>
+                                    <th className="px-6 py-3">Date</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-line">
                                 {sales.map((sale) => (
-                                    <tr key={sale._id} className="hover:bg-slate-50/80 transition-colors">
-                                        <td className="px-5 py-3 font-medium text-slate-900 whitespace-nowrap">
+                                    <tr key={sale._id} className="hover:bg-linen/50 transition-colors">
+                                        <td className="px-6 py-3.5 font-medium text-ink whitespace-nowrap">
                                             {sale.invoiceNumber}
                                         </td>
-                                        <td className="px-5 py-3">
-                                            <div className="text-slate-900">{sale.customer?.name}</div>
-                                            <div className="text-xs text-slate-500">{sale.customer?.phone}</div>
+                                        <td className="px-6 py-3.5">
+                                            <div className="text-ink">{sale.customer?.name}</div>
+                                            <div className="text-xs text-stone">{sale.customer?.phone}</div>
                                         </td>
-                                        <td className="px-5 py-3 text-slate-600 max-w-[220px] truncate">
+                                        <td className="px-6 py-3.5 text-stone max-w-[220px] truncate">
                                             {summarizeItems(sale.items)}
                                         </td>
-                                        <td className="px-5 py-3 text-right text-slate-900 whitespace-nowrap">
+                                        <td className="px-6 py-3.5 text-right text-ink whitespace-nowrap">
                                             {formatCurrency(sale.billedAmount)}
                                         </td>
-                                        <td className="px-5 py-3 text-right text-slate-600 whitespace-nowrap">
+                                        <td className="px-6 py-3.5 text-right text-stone whitespace-nowrap">
                                             {formatCurrency(sale.amountPaid)}
                                         </td>
-                                        <td className="px-5 py-3 text-right text-slate-600 whitespace-nowrap">
+                                        <td className="px-6 py-3.5 text-right text-stone whitespace-nowrap">
                                             {formatCurrency(sale.pendingAmount)}
                                         </td>
-                                        <td className="px-5 py-3">
+                                        <td className="px-6 py-3.5">
                                             <StatusBadge status={sale.status} />
                                         </td>
-                                        <td className="px-5 py-3 text-slate-500 whitespace-nowrap">
+                                        <td className="px-6 py-3.5 text-stone whitespace-nowrap">
                                             {formatDate(sale.saleDate)}
                                         </td>
                                     </tr>
@@ -154,42 +154,42 @@ export default function RecentSalesTable({ refreshKey }) {
                     </div>
 
                     {/* Mobile cards */}
-                    <div className="md:hidden divide-y divide-slate-100">
+                    <div className="md:hidden divide-y divide-line">
                         {sales.map((sale) => (
                             <div key={sale._id} className="px-4 py-3.5">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                        <div className="text-sm font-medium text-slate-900 truncate">
+                                        <div className="text-sm font-medium text-ink truncate">
                                             {sale.customer?.name}
                                         </div>
-                                        <div className="text-xs text-slate-400">{sale.customer?.phone}</div>
+                                        <div className="text-xs text-stone">{sale.customer?.phone}</div>
                                     </div>
                                     <StatusBadge status={sale.status} />
                                 </div>
 
-                                <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
+                                <div className="flex items-center justify-between mt-2 text-xs text-stone">
                                     <span className="font-mono">{sale.invoiceNumber}</span>
                                     <span>{formatDate(sale.saleDate)}</span>
                                 </div>
 
-                                <div className="text-xs text-slate-500 mt-1 truncate">{summarizeItems(sale.items)}</div>
+                                <div className="text-xs text-stone mt-1 truncate">{summarizeItems(sale.items)}</div>
 
-                                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100 text-center">
+                                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-line text-center">
                                     <div>
-                                        <div className="text-[11px] text-slate-400">Billed</div>
-                                        <div className="text-sm font-medium text-slate-800">
+                                        <div className="text-[11px] text-stone">Billed</div>
+                                        <div className="text-sm font-medium text-ink">
                                             {formatCurrency(sale.billedAmount)}
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-[11px] text-slate-400">Paid</div>
-                                        <div className="text-sm font-medium text-emerald-700">
+                                        <div className="text-[11px] text-stone">Paid</div>
+                                        <div className="text-sm font-medium text-moss">
                                             {formatCurrency(sale.amountPaid)}
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-[11px] text-slate-400">Due</div>
-                                        <div className="text-sm font-medium text-rose-600">
+                                        <div className="text-[11px] text-stone">Due</div>
+                                        <div className="text-sm font-medium text-rose-700">
                                             {formatCurrency(sale.pendingAmount)}
                                         </div>
                                     </div>

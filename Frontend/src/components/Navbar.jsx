@@ -1,169 +1,68 @@
+// src/components/Navbar.jsx
+// Floating, frosted "pill" navbar in a deeper sand shade than the page.
+// Active category = solid olive pill. Mobile = slide-in drawer with search.
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronRight, LayoutDashboard, LogOut, Menu, Search, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useCategories } from "../hooks/useCategories";
 import logo from "../assets/galaxy-novelty-logo.png";
 
-// ---------------------------------------------------------------------------
-// Dynamic categories
-// ---------------------------------------------------------------------------
-const API_BASE = import.meta.env.VITE_API_URL || "";
-
-function useCategories() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/categories`);
-        if (!res.ok) throw new Error("Failed to load categories");
-        const json = await res.json();
-        // Backend wraps the payload as { data: [...] } (ApiResponse envelope),
-        // not { categories: [...] } — unwrap accordingly.
-        const list = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
-        if (!cancelled) {
-          setCategories(list);
-          setError(false);
-        }
-      } catch (err) {
-        console.error("Navbar: could not load categories", err);
-        if (!cancelled) {
-          setCategories([]);
-          setError(true);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { categories, loading, error };
-}
-
-// Header gains a solid backdrop + shadow once the page has scrolled past
-// this many pixels — reads as "settling" rather than floating.
-const SCROLL_THRESHOLD = 12;
 const MAX_INLINE_CATEGORIES = 5;
+const SCROLL_THRESHOLD = 12;
 
-const SearchIcon = ({ className = "w-[18px] h-[18px]" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
-    <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const MenuIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-    <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const CloseIcon = ({ className = "w-5 h-5" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const ChevronDown = ({ className = "w-3.5 h-3.5" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ChevronRight = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const DashboardIcon = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-    <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-    <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-    <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
-  </svg>
-);
-
-const LogoutIcon = ({ className = "w-4 h-4" }) => (
-  <svg viewBox="0 0 24 24" className={className} fill="none">
-    <path
-      d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M16 16l4-4-4-4M20 12H9"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+const navLink =
+  "relative px-4 py-2 rounded-full text-[14px] font-medium transition-all duration-200";
+const navIdle = "text-ink/75 hover:text-ink hover:bg-white/50";
+const navActive = "bg-moss text-paper shadow-[0_6px_16px_-8px_rgba(57,58,34,0.8)]";
 
 const BrandMark = ({ onClick }) => (
-  <Link to="/" onClick={onClick} className="flex items-center gap-3 shrink-0 group">
-    <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#F6F1E7] ring-2 ring-[#C9A66B]/60 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 group-hover:ring-[#C9A66B]">
+  <Link to="/" onClick={onClick} className="flex items-center gap-2.5 shrink-0 group">
+    <span className="w-10 h-10 rounded-full bg-white ring-1 ring-black/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
       <img src={logo} alt="Galaxy Furniture" className="w-full h-full object-cover" />
     </span>
-    <span className="font-serif text-[17px] sm:text-[18px] font-semibold text-[#F6F1E7] tracking-[0.02em] leading-none hidden sm:block">
-      GALAXY <span className="text-[#C9A66B] italic font-normal">Furniture</span>
+    <span className="font-serif text-[23px] font-semibold text-ink tracking-[0.02em] leading-none hidden sm:block">
+      GALAXY <span className="text-clay italic font-medium">Furniture</span>
     </span>
   </Link>
 );
 
-const Avatar = ({ name, size = "w-9 h-9", textSize = "text-[13px]" }) => (
+const Avatar = ({ name, size = "w-9 h-9", text = "text-[13px]" }) => (
   <span
-    className={`${size} rounded-full bg-gradient-to-br from-[#C9A66B] to-[#9C7A45] text-[#241A14] ${textSize} font-semibold flex items-center justify-center uppercase shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]`}
+    className={`${size} ${text} rounded-full bg-moss text-paper font-semibold flex items-center justify-center uppercase shrink-0`}
   >
     {name?.charAt(0) || "U"}
   </span>
 );
 
-const AccountMenu = ({ user, isStaff, onNavigate, onLogout, variant = "panel" }) => (
-  <div className={variant === "panel" ? "py-1.5" : "flex flex-col gap-1"}>
-    <div className={variant === "panel" ? "flex items-center gap-3 px-4 py-3" : "flex items-center gap-3 px-1 pb-3"}>
-      <Avatar name={user.username} size="w-10 h-10" textSize="text-[14px]" />
+const AccountMenu = ({ user, isStaff, onNavigate, onLogout }) => (
+  <div className="py-1.5">
+    <div className="flex items-center gap-3 px-4 py-3">
+      <Avatar name={user.username} size="w-10 h-10" text="text-[14px]" />
       <div className="min-w-0">
-        <p className={`text-[14px] font-semibold truncate ${variant === "panel" ? "text-[#14171C]" : "text-[#F6F1E7]"}`}>
-          {user.username}
-        </p>
-        <p className={`text-[11.5px] uppercase tracking-wider ${variant === "panel" ? "text-[#9CA0A6]" : "text-[#F6F1E7]/55"}`}>
+        <p className="text-[14px] font-semibold text-ink truncate">{user.username}</p>
+        <p className="text-[11px] uppercase tracking-[0.14em] text-stone">
           {isStaff ? "Staff account" : "Account"}
         </p>
       </div>
     </div>
-
-    <div className={variant === "panel" ? "h-px bg-[#EDEEE9] mb-1.5" : "h-px bg-[#3B2A22] mb-2"} />
-
+    <div className="h-px bg-line mb-1.5" />
     {isStaff && (
       <Link
         to="/admin"
         onClick={onNavigate}
-        className={
-          variant === "panel"
-            ? "flex items-center gap-2.5 px-4 py-2.5 text-[14px] text-[#14171C] hover:bg-[#F6F7F3] transition-colors"
-            : "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[15px] text-[#F6F1E7] hover:bg-white/10 transition-colors"
-        }
+        className="flex items-center gap-2.5 px-4 py-2.5 text-[14px] text-ink hover:bg-linen transition-colors"
       >
-        <DashboardIcon />
+        <LayoutDashboard className="w-4 h-4" />
         Admin Dashboard
       </Link>
     )}
-
     <button
       onClick={onLogout}
-      className={
-        variant === "panel"
-          ? "w-full flex items-center gap-2.5 text-left px-4 py-2.5 text-[14px] text-[#C0402E] hover:bg-[#F6F7F3] transition-colors"
-          : "w-full flex items-center gap-2.5 text-left px-3 py-2.5 rounded-lg text-[15px] text-[#E27D64] hover:bg-white/10 transition-colors"
-      }
+      className="w-full flex items-center gap-2.5 text-left px-4 py-2.5 text-[14px] text-[#B5472F] hover:bg-linen transition-colors"
     >
-      <LogoutIcon />
+      <LogOut className="w-4 h-4" />
       Log out
     </button>
   </div>
@@ -173,12 +72,11 @@ const Navbar = () => {
   const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { categories, loading: categoriesLoading, error: categoriesError } = useCategories();
+  const { categories, loading: catLoading, error: catError } = useCategories();
 
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [accountOpen, setAccountOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -188,9 +86,11 @@ const Navbar = () => {
 
   const isStaff = user?.role === "admin";
   const activeCategory = new URLSearchParams(location.search).get("category");
+  const onContact = location.pathname === "/contact";
 
-  const inlineCategories = categories.slice(0, MAX_INLINE_CATEGORIES);
-  const overflowCategories = categories.slice(MAX_INLINE_CATEGORIES);
+  const inline = categories.slice(0, MAX_INLINE_CATEGORIES);
+  const overflow = categories.slice(MAX_INLINE_CATEGORIES);
+  const catsReady = !catLoading && !catError;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -200,383 +100,324 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const handleClick = (e) => {
+    const onDown = (e) => {
       if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false);
       if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
   useEffect(() => {
-    const handleKey = (e) => {
+    const onKey = (e) => {
       if (e.key !== "Escape") return;
-      setMobileOpen(false);
-      setMobileSearchOpen(false);
+      setDrawerOpen(false);
       setAccountOpen(false);
       setMoreOpen(false);
     };
-    document.addEventListener("keydown", handleKey);
-
-    const locked = mobileOpen || mobileSearchOpen;
-    document.body.style.overflow = locked ? "hidden" : "";
-
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
     return () => {
-      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [mobileOpen, mobileSearchOpen]);
+  }, [drawerOpen]);
 
-  const handleSearchSubmit = (e) => {
+  const submitSearch = (e) => {
     e.preventDefault();
-    if (!searchValue.trim()) return;
-    navigate(`/shop?search=${encodeURIComponent(searchValue.trim())}`);
+    const q = searchValue.trim();
+    if (!q) return;
+    navigate(`/shop?search=${encodeURIComponent(q)}`);
     setSearchOpen(false);
-    setMobileSearchOpen(false);
+    setDrawerOpen(false);
     setSearchValue("");
-    setMobileOpen(false);
   };
 
   const handleLogout = async () => {
     setAccountOpen(false);
-    setMobileOpen(false);
+    setDrawerOpen(false);
     await logout();
     navigate("/");
   };
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-[#241A14]/95 backdrop-blur-md shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)]"
-            : "bg-gradient-to-r from-[#2E2119] to-[#241A14] backdrop-blur-sm"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-10">
-          <div className={`flex items-center justify-between gap-6 transition-[height] duration-300 ${scrolled ? "h-[60px]" : "h-16"}`}>
-            <BrandMark onClick={() => setMobileOpen(false)} />
+      <header className="sticky top-0 z-50 px-3 sm:px-5 pt-3">
+        <div
+          className={`mx-auto max-w-7xl rounded-full border backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ${
+            scrolled
+              ? "bg-[#E5DBC7]/85 border-white/60 shadow-[0_18px_40px_-18px_rgba(42,37,31,0.5)]"
+              : "bg-[#EAE1CF]/70 border-white/50 shadow-[0_10px_26px_-18px_rgba(42,37,31,0.35)]"
+          }`}
+        >
+          <div
+            className={`flex items-center justify-between gap-4 px-2.5 sm:px-3 transition-[height] duration-300 ${
+              scrolled ? "h-[54px]" : "h-[60px]"
+            }`}
+          >
+            <BrandMark onClick={() => setDrawerOpen(false)} />
 
-            {/* Desktop category nav */}
-            <nav className="hidden md:flex items-center gap-0.5">
-              {categoriesLoading &&
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {catLoading &&
                 Array.from({ length: 4 }).map((_, i) => (
-                  <span key={i} className="h-[30px] w-20 rounded-full bg-white/10 animate-pulse mx-0.5" />
+                  <span key={i} className="h-8 w-20 rounded-full bg-white/40 animate-pulse" />
                 ))}
 
-              {!categoriesLoading && categoriesError && (
-                <span className="text-[13px] text-[#E27D64] italic px-2">Couldn't load categories</span>
-              )}
-
-              {!categoriesLoading && !categoriesError && categories.length === 0 && (
-                <span className="text-[13px] text-[#F6F1E7]/45 italic px-2">No categories yet</span>
-              )}
-
-              {!categoriesLoading &&
-                !categoriesError &&
-                inlineCategories.map((cat) => {
-                  const isActive = activeCategory === cat.slug;
+              {catsReady &&
+                inline.map((cat) => {
+                  const active = activeCategory === cat.slug;
                   return (
                     <Link
                       key={cat._id || cat.slug}
                       to={`/shop?category=${cat.slug}`}
-                      className="relative px-3.5 py-2 rounded-full text-[14px] font-medium transition-colors duration-150 text-[#F6F1E7]/85 hover:text-[#F6F1E7] hover:bg-white/[0.07]"
+                      className={`${navLink} ${active ? navActive : navIdle}`}
                     >
                       {cat.name}
-                      {isActive && (
-                        <span className="absolute left-1/2 -translate-x-1/2 -bottom-[3px] w-1 h-1 rounded-full bg-[#C9A66B]" />
-                      )}
-                      {isActive && <span className="absolute inset-0 rounded-full bg-white/[0.06] ring-1 ring-[#C9A66B]/40 -z-10" />}
                     </Link>
                   );
                 })}
 
-              {!categoriesLoading && !categoriesError && overflowCategories.length > 0 && (
+              {catsReady && overflow.length > 0 && (
                 <div className="relative" ref={moreRef}>
                   <button
                     onClick={() => setMoreOpen((v) => !v)}
                     aria-expanded={moreOpen}
-                    className="flex items-center gap-1 px-3.5 py-2 rounded-full text-[14px] font-medium text-[#F6F1E7]/85 hover:text-[#F6F1E7] hover:bg-white/[0.07] transition-colors duration-150"
+                    className={`${navLink} ${navIdle} flex items-center gap-1`}
                   >
                     More
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} />
                   </button>
-
                   <div
-                    className={`absolute left-0 mt-2 w-56 rounded-2xl border border-[#3B2A22] bg-[#2E2119] shadow-[0_20px_50px_-16px_rgba(0,0,0,0.55)] py-1.5 max-h-80 overflow-y-auto origin-top transition-all duration-150 ${
+                    className={`absolute left-0 mt-3 w-56 rounded-2xl border border-white/70 bg-[#FBF7EE]/95 backdrop-blur-xl shadow-[0_24px_50px_-20px_rgba(42,37,31,0.45)] py-1.5 max-h-80 overflow-y-auto origin-top transition-all duration-150 ${
                       moreOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
                     }`}
                   >
-                    {overflowCategories.map((cat) => {
-                      const isActive = activeCategory === cat.slug;
-                      return (
-                        <Link
-                          key={cat._id || cat.slug}
-                          to={`/shop?category=${cat.slug}`}
-                          onClick={() => setMoreOpen(false)}
-                          className={`flex items-center justify-between px-4 py-2.5 text-[14px] transition-colors ${
-                            isActive ? "text-[#C9A66B] bg-white/[0.04]" : "text-[#F6F1E7]/85 hover:bg-white/[0.07]"
-                          }`}
-                        >
-                          {cat.name}
-                          {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#C9A66B]" />}
-                        </Link>
-                      );
-                    })}
+                    {overflow.map((cat) => (
+                      <Link
+                        key={cat._id || cat.slug}
+                        to={`/shop?category=${cat.slug}`}
+                        onClick={() => setMoreOpen(false)}
+                        className={`flex items-center justify-between px-4 py-2.5 text-[14px] transition-colors ${
+                          activeCategory === cat.slug ? "text-moss bg-linen" : "text-ink/80 hover:bg-linen"
+                        }`}
+                      >
+                        {cat.name}
+                        {activeCategory === cat.slug && <span className="w-1.5 h-1.5 rounded-full bg-moss" />}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               )}
+
+              {!catLoading && (
+                <Link to="/contact" className={`${navLink} ${onContact ? navActive : navIdle}`}>
+                  Contact
+                </Link>
+              )}
             </nav>
 
-            {/* Right side controls */}
+            {/* Right controls */}
             <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Desktop search */}
-              <div className="hidden sm:flex items-center">
-                <form onSubmit={handleSearchSubmit} className="flex items-center">
-                  <div
-                    className={`flex items-center overflow-hidden rounded-full border transition-all duration-300 ease-out ${
-                      searchOpen
-                        ? "w-60 bg-black/25 border-[#C9A66B]/40 pl-3.5 pr-1"
-                        : "w-9 bg-transparent border-transparent"
-                    }`}
+              {/* Desktop expanding search */}
+              <form onSubmit={submitSearch} className="hidden sm:flex">
+                <div
+                  className={`flex items-center overflow-hidden rounded-full border transition-all duration-300 ease-out ${
+                    searchOpen ? "w-60 bg-white/60 border-white pl-3 pr-1" : "w-10 bg-transparent border-transparent"
+                  }`}
+                >
+                  <button
+                    type={searchOpen ? "button" : "submit"}
+                    onClick={() => !searchOpen && setSearchOpen(true)}
+                    aria-label="Search products"
+                    className="w-9 h-10 shrink-0 flex items-center justify-center text-ink/75 hover:text-ink"
                   >
-                    <button
-                      type={searchOpen ? "button" : "submit"}
-                      onClick={() => !searchOpen && setSearchOpen(true)}
-                      aria-label="Search products"
-                      className="w-7 h-9 flex items-center justify-center text-[#F6F1E7]/85 hover:text-[#F6F1E7] shrink-0"
-                    >
-                      <SearchIcon />
-                    </button>
-                    <input
-                      type="text"
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      onBlur={() => !searchValue && setSearchOpen(false)}
-                      placeholder="Search sofas, beds, decor…"
-                      tabIndex={searchOpen ? 0 : -1}
-                      className={`bg-transparent text-[13px] text-[#F6F1E7] placeholder:text-[#F6F1E7]/45 focus:outline-none py-2 transition-opacity duration-200 ${
-                        searchOpen ? "opacity-100 w-full pr-2" : "opacity-0 w-0"
-                      }`}
-                    />
-                  </div>
-                </form>
-              </div>
+                    <Search className="w-[18px] h-[18px]" />
+                  </button>
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    onBlur={() => !searchValue && setSearchOpen(false)}
+                    placeholder="Search sofas, beds, decor…"
+                    tabIndex={searchOpen ? 0 : -1}
+                    className={`bg-transparent text-[13px] text-ink placeholder:text-stone/70 focus:outline-none py-2 transition-opacity duration-200 ${
+                      searchOpen ? "opacity-100 w-full pr-2" : "opacity-0 w-0"
+                    }`}
+                  />
+                </div>
+              </form>
 
-              {/* Mobile search trigger */}
+              {/* Mobile search → opens drawer */}
               <button
-                onClick={() => setMobileSearchOpen(true)}
+                onClick={() => setDrawerOpen(true)}
                 aria-label="Search products"
-                className="sm:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#F6F1E7]/85 hover:text-[#F6F1E7] hover:bg-white/[0.07] transition-colors duration-150"
+                className="sm:hidden w-10 h-10 flex items-center justify-center rounded-full text-ink/75 hover:bg-white/50"
               >
-                <SearchIcon />
+                <Search className="w-[18px] h-[18px]" />
               </button>
 
-              {/* Auth area */}
-              {!authLoading && (
-                <>
-                  {user ? (
-                    <div className="hidden md:flex items-center gap-2">
-                      {isStaff && (
-                        <Link
-                          to="/admin"
-                          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#C9A66B]/40 bg-white/[0.04] text-[13.5px] font-medium text-[#F6F1E7] hover:bg-white/[0.08] hover:border-[#C9A66B]/60 transition-colors duration-150"
-                        >
-                          <DashboardIcon />
-                          Dashboard
-                        </Link>
-                      )}
-
-                      <div className="relative" ref={accountRef}>
-                        <button
-                          onClick={() => setAccountOpen((v) => !v)}
-                          aria-label="Account menu"
-                          aria-expanded={accountOpen}
-                          className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full border border-[#C9A66B]/40 bg-white/[0.04] hover:bg-white/[0.08] transition-colors duration-150"
-                        >
-                          <Avatar name={user.username} />
-                          <ChevronDown className={`w-3.5 h-3.5 text-[#F6F1E7]/70 transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`} />
-                        </button>
-
-                        <div
-                          className={`absolute right-0 mt-2 w-56 rounded-2xl border border-[#E1E3DD] bg-white shadow-[0_20px_50px_-16px_rgba(20,23,28,0.3)] overflow-hidden origin-top-right transition-all duration-150 ${
-                            accountOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                          }`}
-                        >
-                          <AccountMenu
-                            user={user}
-                            isStaff={isStaff}
-                            onNavigate={() => setAccountOpen(false)}
-                            onLogout={handleLogout}
-                            variant="panel"
-                          />
-                        </div>
+              {!authLoading &&
+                (user ? (
+                  <div className="hidden md:flex items-center gap-2">
+                    {isStaff && (
+                      <Link
+                        to="/admin"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-paper text-[13.5px] font-medium hover:bg-ink/85 transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                    )}
+                    <div className="relative" ref={accountRef}>
+                      <button
+                        onClick={() => setAccountOpen((v) => !v)}
+                        aria-label="Account menu"
+                        aria-expanded={accountOpen}
+                        className="flex items-center gap-1 pl-0.5 pr-2 py-0.5 rounded-full border border-white/70 bg-white/40 hover:bg-white/70 transition-colors"
+                      >
+                        <Avatar name={user.username} size="w-8 h-8" />
+                        <ChevronDown className={`w-3.5 h-3.5 text-ink/60 transition-transform duration-200 ${accountOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      <div
+                        className={`absolute right-0 mt-3 w-56 rounded-2xl border border-white/70 bg-[#FBF7EE]/95 backdrop-blur-xl shadow-[0_24px_50px_-20px_rgba(42,37,31,0.45)] overflow-hidden origin-top-right transition-all duration-150 ${
+                          accountOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                        }`}
+                      >
+                        <AccountMenu
+                          user={user}
+                          isStaff={isStaff}
+                          onNavigate={() => setAccountOpen(false)}
+                          onLogout={handleLogout}
+                        />
                       </div>
                     </div>
-                  ) : (
-                    <Link
-                      to="/login"
-                      className="hidden md:inline-flex items-center justify-center rounded-full border border-[#C9A66B]/50 text-[13.5px] font-medium text-[#F6F1E7] px-4 py-2 hover:bg-white/[0.08] transition-colors duration-150"
-                    >
-                      Staff login
-                    </Link>
-                  )}
-                </>
-              )}
+                  </div>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="hidden md:inline-flex items-center rounded-full bg-ink text-paper text-[13.5px] font-medium px-5 py-2.5 hover:bg-ink/85 transition-colors"
+                  >
+                    Staff login
+                  </Link>
+                ))}
 
               {!authLoading && user && (
                 <span className="md:hidden">
-                  <Avatar name={user.username} size="w-8 h-8" textSize="text-[12px]" />
+                  <Avatar name={user.username} size="w-8 h-8" text="text-[12px]" />
                 </span>
               )}
 
-              {/* Mobile menu toggle */}
               <button
-                onClick={() => setMobileOpen(true)}
+                onClick={() => setDrawerOpen(true)}
                 aria-label="Open menu"
-                className="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#F6F1E7] hover:bg-white/[0.08] transition-colors duration-150"
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full text-ink hover:bg-white/50 transition-colors"
               >
-                <MenuIcon />
+                <Menu className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
-
-        {/* Brass hairline seam */}
-        <div className="h-[2px] bg-gradient-to-r from-transparent via-[#C9A66B]/70 to-transparent" />
       </header>
 
-      {/* -------------------------------------------------------------- */}
-      {/* Mobile search overlay — full-width slide-down bar               */}
-      {/* -------------------------------------------------------------- */}
-      <div
-        className={`fixed inset-0 z-[60] sm:hidden transition-opacity duration-200 ${
-          mobileSearchOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileSearchOpen(false)} />
+      {/* Mobile drawer */}
+      <div className={`fixed inset-0 z-[70] md:hidden ${drawerOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
         <div
-          className={`relative bg-[#241A14] border-b border-[#3B2A22] px-5 pt-5 pb-6 transition-transform duration-300 ease-out ${
-            mobileSearchOpen ? "translate-y-0" : "-translate-y-6"
+          onClick={() => setDrawerOpen(false)}
+          className={`absolute inset-0 bg-ink/40 backdrop-blur-sm transition-opacity duration-300 ${
+            drawerOpen ? "opacity-100" : "opacity-0"
           }`}
-        >
-          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2.5 bg-black/25 border border-[#C9A66B]/30 rounded-full px-4 py-3">
-              <SearchIcon className="w-[18px] h-[18px] text-[#F6F1E7]/60 shrink-0" />
-              <input
-                autoFocus
-                type="text"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Search sofas, beds, decor…"
-                className="flex-1 bg-transparent text-[14px] text-[#F6F1E7] placeholder:text-[#F6F1E7]/45 focus:outline-none"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => setMobileSearchOpen(false)}
-              aria-label="Close search"
-              className="w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-[#F6F1E7]/70 hover:text-[#F6F1E7] hover:bg-white/[0.08] transition-colors"
-            >
-              <CloseIcon />
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* -------------------------------------------------------------- */}
-      {/* Mobile drawer — slides in from the right, backdrop dims content */}
-      {/* -------------------------------------------------------------- */}
-      <div className={`fixed inset-0 z-[70] md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
-        <div
-          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-            mobileOpen ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={() => setMobileOpen(false)}
         />
-
-        <div
-          className={`absolute right-0 top-0 h-full w-[85%] max-w-sm bg-[#241A14] border-l border-[#3B2A22] shadow-[-20px_0_60px_-20px_rgba(0,0,0,0.6)] flex flex-col transition-transform duration-300 ease-out ${
-            mobileOpen ? "translate-x-0" : "translate-x-full"
+        <aside
+          className={`absolute right-0 top-0 h-full w-[86%] max-w-sm bg-[#F4EFE6] border-l border-line shadow-[-24px_0_60px_-30px_rgba(42,37,31,0.55)] flex flex-col transition-transform duration-300 ease-out ${
+            drawerOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          {/* Drawer header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#3B2A22] shrink-0">
-            <BrandMark onClick={() => setMobileOpen(false)} />
+          <div className="flex items-center justify-between px-5 py-4 border-b border-line shrink-0">
+            <BrandMark onClick={() => setDrawerOpen(false)} />
             <button
-              onClick={() => setMobileOpen(false)}
+              onClick={() => setDrawerOpen(false)}
               aria-label="Close menu"
-              className="w-9 h-9 flex items-center justify-center rounded-full text-[#F6F1E7] hover:bg-white/[0.08] transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full text-ink hover:bg-ink/5"
             >
-              <CloseIcon />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto px-5 py-5">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[#F6F1E7]/40 mb-3 px-1">
+            <form onSubmit={submitSearch} className="mb-6">
+              <div className="flex items-center gap-2.5 bg-white/70 border border-line rounded-full px-4 py-3">
+                <Search className="w-[18px] h-[18px] text-stone shrink-0" />
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Search sofas, beds, decor…"
+                  className="flex-1 bg-transparent text-[14px] text-ink placeholder:text-stone/70 focus:outline-none"
+                />
+              </div>
+            </form>
+
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-stone mb-3 px-1">
               Shop by category
             </p>
-            <nav className="flex flex-col gap-1 mb-6">
-              {categoriesLoading &&
+            <nav className="flex flex-col gap-1">
+              {catLoading &&
                 Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className="h-11 rounded-lg bg-white/[0.06] animate-pulse" />
+                  <span key={i} className="h-11 rounded-xl bg-ink/5 animate-pulse" />
                 ))}
-
-              {!categoriesLoading && categoriesError && (
-                <span className="px-3 py-2.5 text-[14px] text-[#E27D64] italic">
-                  Couldn't load categories — check your connection
-                </span>
+              {!catLoading && catError && (
+                <span className="px-3 py-2.5 text-[14px] text-[#B5472F] italic">Couldn't load categories</span>
               )}
-
-              {!categoriesLoading && !categoriesError && categories.length === 0 && (
-                <span className="px-3 py-2.5 text-[14px] text-[#F6F1E7]/45 italic">
-                  No categories yet — check back soon
-                </span>
-              )}
-
-              {!categoriesLoading &&
-                !categoriesError &&
+              {catsReady &&
                 categories.map((cat) => {
-                  const isActive = activeCategory === cat.slug;
+                  const active = activeCategory === cat.slug;
                   return (
                     <Link
                       key={cat._id || cat.slug}
                       to={`/shop?category=${cat.slug}`}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-[15px] font-medium transition-colors duration-150 ${
-                        isActive ? "bg-[#C9A66B] text-[#241A14]" : "text-[#F6F1E7] hover:bg-white/[0.07]"
+                      onClick={() => setDrawerOpen(false)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-[15px] font-medium transition-colors ${
+                        active ? "bg-moss text-paper" : "text-ink hover:bg-ink/5"
                       }`}
                     >
                       {cat.name}
-                      <ChevronRight className={`w-4 h-4 ${isActive ? "text-[#241A14]/60" : "text-[#F6F1E7]/30"}`} />
+                      <ChevronRight className={`w-4 h-4 ${active ? "text-paper/70" : "text-ink/30"}`} />
                     </Link>
                   );
                 })}
+              <Link
+                to="/contact"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-[15px] font-medium text-ink hover:bg-ink/5 transition-colors"
+              >
+                Contact the showroom
+                <ChevronRight className="w-4 h-4 text-ink/30" />
+              </Link>
             </nav>
           </div>
 
-          {/* Fixed account footer */}
-          <div className="shrink-0 border-t border-[#3B2A22] px-5 py-5">
+          <div className="shrink-0 border-t border-line px-5 py-5">
             {!authLoading && user ? (
-              <AccountMenu
-                user={user}
-                isStaff={isStaff}
-                onNavigate={() => setMobileOpen(false)}
-                onLogout={handleLogout}
-                variant="drawer"
-              />
+              <div className="rounded-2xl bg-card border border-line overflow-hidden">
+                <AccountMenu
+                  user={user}
+                  isStaff={isStaff}
+                  onNavigate={() => setDrawerOpen(false)}
+                  onLogout={handleLogout}
+                />
+              </div>
             ) : (
               <Link
                 to="/login"
-                onClick={() => setMobileOpen(false)}
-                className="block text-center rounded-full bg-gradient-to-r from-[#C9A66B] to-[#9C7A45] text-[#241A14] text-[14px] font-semibold px-4 py-3 transition-transform duration-200 hover:-translate-y-0.5"
+                onClick={() => setDrawerOpen(false)}
+                className="block text-center rounded-full bg-ink text-paper text-[14px] font-medium px-4 py-3"
               >
                 Staff login
               </Link>
             )}
           </div>
-        </div>
+        </aside>
       </div>
     </>
   );

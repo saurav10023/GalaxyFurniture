@@ -16,6 +16,9 @@
 // (ArrowUp/Down, Enter, Escape, Home/End), disabled state, and a checkmark
 // on the selected option. Renders as a real <button> + <ul role="listbox">
 // so it stays screen-reader friendly without a component library.
+//
+// Theme: Galaxy Furniture Japandi (Card surface, Line borders, Moss focus,
+// near-opaque cream glass for the dropdown list).
 
 import { useEffect, useRef, useState } from "react";
 
@@ -25,7 +28,7 @@ const IconChevron = ({ open }) => (
     fill="none"
     width="14"
     height="14"
-    className={`shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+    className={`shrink-0 text-stone transition-transform duration-150 ${open ? "rotate-180" : ""}`}
   >
     <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -137,17 +140,18 @@ const Select = ({
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`inline-flex items-center justify-between gap-2 font-mono text-[13px] bg-white border rounded-lg px-3.5 py-2.5 text-[#14171C] transition-colors duration-150 ${
+        aria-controls={open ? instanceId : undefined}
+        className={`inline-flex items-center justify-between gap-2 font-sans text-sm bg-card border rounded-xl px-3.5 py-2.5 text-ink transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-moss/40 ${
           fullWidth ? "w-full" : ""
         } ${
           disabled
-            ? "opacity-60 cursor-not-allowed bg-[#F6F7F3] border-[#E1E3DD]"
+            ? "opacity-60 cursor-not-allowed bg-linen border-line"
             : open
-            ? "border-[#2F5DFF] ring-2 ring-[#2F5DFF]/15"
-            : "border-[#E1E3DD] hover:border-[#C7CAC3]"
+            ? "border-moss ring-2 ring-moss/20"
+            : "border-line hover:border-clay/60"
         }`}
       >
-        <span className={`truncate ${!selected ? "text-[#9CA0A6]" : ""}`}>
+        <span className={`truncate ${!selected ? "text-stone/70" : ""}`}>
           {selected ? selected.label : placeholder}
         </span>
         <IconChevron open={open} />
@@ -158,7 +162,7 @@ const Select = ({
           ref={listRef}
           role="listbox"
           id={instanceId}
-          className="absolute z-30 mt-1.5 min-w-full w-max max-w-[280px] max-h-64 overflow-auto bg-white border border-[#E1E3DD] rounded-lg shadow-lg py-1"
+          className="absolute z-30 mt-1.5 min-w-full w-max max-w-[280px] max-h-64 overflow-auto bg-card/95 backdrop-blur-xl border border-line rounded-2xl shadow-[0_12px_32px_-12px_rgba(42,37,31,0.25)] p-1.5"
         >
           {options.map((opt, i) => {
             const isSelected = String(opt.value) === String(value);
@@ -169,12 +173,12 @@ const Select = ({
                 aria-selected={isSelected}
                 onMouseEnter={() => setActiveIndex(i)}
                 onClick={() => commit(opt)}
-                className={`flex items-center justify-between gap-3 px-3.5 py-2.5 text-[13px] cursor-pointer transition-colors duration-100 ${
-                  i === activeIndex ? "bg-[#F6F7F3]" : ""
-                } ${isSelected ? "text-[#14171C] font-medium" : "text-[#4B4F57]"}`}
+                className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors duration-100 ${
+                  i === activeIndex ? "bg-linen" : ""
+                } ${isSelected ? "text-ink font-medium" : "text-stone"}`}
               >
                 <span className="truncate">{opt.label}</span>
-                {isSelected && <IconCheck className="text-[#2F5DFF] shrink-0" />}
+                {isSelected && <IconCheck className="text-moss shrink-0" />}
               </li>
             );
           })}

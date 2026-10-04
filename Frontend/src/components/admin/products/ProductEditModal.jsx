@@ -7,6 +7,7 @@
 // matches the backend, which doesn't accept category changes on update.
 
 import { useEffect, useState } from "react";
+import Select from "../../ui/Select";
 import {
     getProductByIdAdmin,
     updateProduct,
@@ -15,25 +16,39 @@ import {
 
 const MAX_IMAGES = 5;
 
+const UNIT_OPTIONS = [
+    { value: "cm", label: "cm" },
+    { value: "inch", label: "inch" }
+];
+const DISPLAY_MODE_OPTIONS = [
+    { value: "show_price", label: "Show price" },
+    { value: "contact_for_price", label: "Contact for price" },
+    { value: "starting_from", label: "Starting from price" }
+];
+const OUT_OF_STOCK_OPTIONS = [
+    { value: "show_as_out_of_stock", label: 'Show as "Out of Stock"' },
+    { value: "hide", label: "Hide from customers" }
+];
+
 const inputClass =
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-50";
-const labelClass = "mb-1 block text-sm font-medium text-slate-700";
-const smallLabelClass = "mb-1 block text-xs font-medium text-slate-500";
+    "w-full rounded-xl border border-line bg-card px-3 py-2 text-sm text-ink outline-none transition placeholder:text-stone/60 focus:border-moss focus:ring-4 focus:ring-moss/10";
+const labelClass = "mb-1 block text-sm font-medium text-ink";
+const smallLabelClass = "mb-1 block text-xs font-medium text-stone";
 
 function Toggle({ checked, onChange }) {
     return (
         <span className="relative inline-flex shrink-0 items-center">
             <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-            <span className="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-indigo-600" />
-            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+            <span className="h-6 w-11 rounded-full bg-stone/30 transition peer-checked:bg-moss peer-focus-visible:ring-2 peer-focus-visible:ring-moss/40" />
+            <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-card shadow-sm transition peer-checked:translate-x-5" />
         </span>
     );
 }
 
 function Section({ title, children }) {
     return (
-        <fieldset className="rounded-xl border border-slate-200 p-4">
-            <legend className="px-1 text-sm font-semibold text-slate-700">{title}</legend>
+        <fieldset className="rounded-2xl border border-line p-4">
+            <legend className="px-1 text-sm font-semibold text-ink">{title}</legend>
             <div className="mt-2 space-y-3">{children}</div>
         </fieldset>
     );
@@ -62,7 +77,7 @@ function AttributeInput({ field, value, onChange }) {
             );
         case "boolean":
             return (
-                <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                <label className="flex items-center gap-2.5 text-sm text-stone">
                     <Toggle checked={Boolean(value)} onChange={onChange} />
                     Yes
                 </label>
@@ -77,21 +92,18 @@ function AttributeInput({ field, value, onChange }) {
                     type="color"
                     value={value || "#000000"}
                     onChange={(e) => onChange(e.target.value)}
-                    className="h-10 w-16 cursor-pointer rounded-lg border border-slate-300"
+                    className="h-10 w-16 cursor-pointer rounded-xl border border-line bg-card"
                 />
             );
         case "select":
             return (
-                <select value={value ?? ""} onChange={(e) => onChange(e.target.value)} className={inputClass}>
-                    <option value="" disabled>
-                        Select…
-                    </option>
-                    {(field.options || []).map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </select>
+                <Select
+                    value={value ?? ""}
+                    onChange={onChange}
+                    options={(field.options || []).map((opt) => ({ value: opt, label: opt }))}
+                    placeholder="Select…"
+                    fullWidth
+                />
             );
         case "multiselect": {
             const selected = Array.isArray(value) ? value : [];
@@ -106,8 +118,8 @@ function AttributeInput({ field, value, onChange }) {
                             onClick={() => toggle(opt)}
                             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                                 selected.includes(opt)
-                                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                    : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                                    ? "border-moss bg-moss/10 text-moss"
+                                    : "border-line text-stone hover:bg-linen"
                             }`}
                         >
                             {opt}
@@ -332,22 +344,23 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={submitting ? undefined : onClose} />
+            <div className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]" onClick={submitting ? undefined : onClose} />
 
-            <div className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-xl sm:max-w-2xl sm:rounded-2xl">
-                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+            {/* Near-opaque cream glass panel */}
+            <div className="relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl border border-line bg-card/95 shadow-[0_24px_48px_-20px_rgba(42,37,31,0.35)] backdrop-blur-xl sm:max-w-2xl sm:rounded-3xl">
+                <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4 sm:px-6">
                     <div className="min-w-0">
-                        <h2 className="text-base font-semibold text-slate-900">Edit product</h2>
-                        {categoryName && <p className="mt-0.5 truncate text-xs text-slate-400">Category: {categoryName}</p>}
+                        <h2 className="font-display text-xl font-semibold text-ink">Edit product</h2>
+                        {categoryName && <p className="mt-0.5 truncate text-xs text-stone">Category: {categoryName}</p>}
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={submitting}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:opacity-40"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone transition hover:bg-linen hover:text-ink disabled:opacity-40"
                         aria-label="Close"
                     >
-                        <svg viewBox="0 0 24 24" fill="none" className="h-4.5 w-4.5">
+                        <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]">
                             <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                         </svg>
                     </button>
@@ -356,18 +369,18 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                 <div className="overflow-y-auto">
                     {loading ? (
                         <div className="flex flex-col items-center gap-3 py-20">
-                            <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 animate-spin text-indigo-500">
+                            <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 animate-spin text-moss">
                                 <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
                                 <path d="M21 12a9 9 0 00-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                             </svg>
-                            <p className="text-sm text-slate-400">Loading product…</p>
+                            <p className="text-sm text-stone">Loading product…</p>
                         </div>
                     ) : loadError ? (
-                        <p className="py-20 text-center text-sm text-red-600">{loadError}</p>
+                        <p className="py-20 text-center text-sm text-red-700">{loadError}</p>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
                             {error && (
-                                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                <div className="rounded-2xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
                                     {error}
                                 </div>
                             )}
@@ -385,13 +398,13 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                 </div>
                                 <div>
                                     <label className={labelClass}>
-                                        Category <span className="font-normal text-slate-400">(locked)</span>
+                                        Category <span className="font-normal text-stone">(locked)</span>
                                     </label>
                                     <input
                                         type="text"
                                         value={categoryName}
                                         disabled
-                                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500"
+                                        className="w-full rounded-xl border border-line bg-linen px-3 py-2 text-sm text-stone"
                                     />
                                 </div>
                             </div>
@@ -465,14 +478,12 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                     ))}
                                     <div>
                                         <label className={smallLabelClass}>Unit</label>
-                                        <select
+                                        <Select
                                             value={form.dimensions.unit}
-                                            onChange={(e) => set("dimensions.unit", e.target.value)}
-                                            className={inputClass}
-                                        >
-                                            <option value="cm">cm</option>
-                                            <option value="inch">inch</option>
-                                        </select>
+                                            onChange={(v) => set("dimensions.unit", v)}
+                                            options={UNIT_OPTIONS}
+                                            fullWidth
+                                        />
                                     </div>
                                 </div>
                             </Section>
@@ -504,18 +515,15 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                 </div>
                                 <div>
                                     <label className={smallLabelClass}>Price display</label>
-                                    <select
+                                    <Select
                                         value={form.pricing.displayMode}
-                                        onChange={(e) => set("pricing.displayMode", e.target.value)}
-                                        className={inputClass}
-                                    >
-                                        <option value="show_price">Show price</option>
-                                        <option value="contact_for_price">Contact for price</option>
-                                        <option value="starting_from">Starting from price</option>
-                                    </select>
+                                        onChange={(v) => set("pricing.displayMode", v)}
+                                        options={DISPLAY_MODE_OPTIONS}
+                                        fullWidth
+                                    />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="flex items-center gap-2.5 text-sm text-slate-600">
+                                    <label className="flex items-center gap-2.5 text-sm text-stone">
                                         <Toggle
                                             checked={form.pricing.negotiation.enabled}
                                             onChange={(v) => set("pricing.negotiation.enabled", v)}
@@ -564,22 +572,20 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
 
                             <div>
                                 <label className={labelClass}>When out of stock</label>
-                                <select
+                                <Select
                                     value={form.outOfStockAction}
-                                    onChange={(e) => set("outOfStockAction", e.target.value)}
-                                    className={inputClass}
-                                >
-                                    <option value="show_as_out_of_stock">Show as "Out of Stock"</option>
-                                    <option value="hide">Hide from customers</option>
-                                </select>
+                                    onChange={(v) => set("outOfStockAction", v)}
+                                    options={OUT_OF_STOCK_OPTIONS}
+                                    fullWidth
+                                />
                             </div>
 
                             <div className="flex flex-col gap-3 sm:flex-row">
-                                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700">
+                                <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-line bg-linen/50 px-4 py-3 text-sm text-ink">
                                     <Toggle checked={form.isFeatured} onChange={(v) => set("isFeatured", v)} />
                                     Featured product
                                 </label>
-                                <label className="flex flex-1 items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700">
+                                <label className="flex flex-1 items-center gap-2.5 rounded-2xl border border-line bg-linen/50 px-4 py-3 text-sm text-ink">
                                     <Toggle checked={form.isNewArrival} onChange={(v) => set("isNewArrival", v)} />
                                     New arrival
                                 </label>
@@ -592,7 +598,7 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                             <div key={field.key}>
                                                 <label className={smallLabelClass}>
                                                     {field.name}
-                                                    {field.required && <span className="text-red-500"> *</span>}
+                                                    {field.required && <span className="text-red-700"> *</span>}
                                                 </label>
                                                 <AttributeInput
                                                     field={field}
@@ -607,7 +613,7 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
 
                             <div>
                                 <label className={labelClass}>
-                                    Images <span className="font-normal text-slate-400">({totalImageCount}/{MAX_IMAGES})</span>
+                                    Images <span className="font-normal text-stone">({totalImageCount}/{MAX_IMAGES})</span>
                                 </label>
 
                                 {existingImages.length > 0 && (
@@ -617,13 +623,13 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                                 <img
                                                     src={img.url}
                                                     alt=""
-                                                    className="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                                                    className="h-16 w-20 rounded-xl border border-line bg-linen object-cover"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => removeExistingImage(img)}
                                                     disabled={removingImageId === img.publicId}
-                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs leading-none text-white shadow disabled:opacity-50"
+                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-xs leading-none text-card shadow disabled:opacity-50"
                                                     aria-label="Remove image"
                                                 >
                                                     {removingImageId === img.publicId ? "…" : "×"}
@@ -634,10 +640,10 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                 )}
 
                                 <label
-                                    className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 text-center text-sm transition ${
+                                    className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-3 text-center text-sm transition ${
                                         totalImageCount >= MAX_IMAGES
-                                            ? "cursor-not-allowed border-slate-100 text-slate-300"
-                                            : "border-slate-200 text-slate-500 hover:bg-slate-50"
+                                            ? "cursor-not-allowed border-line/60 text-stone/50"
+                                            : "border-line text-stone hover:bg-linen/50"
                                     }`}
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
@@ -667,12 +673,12 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                                 <img
                                                     src={URL.createObjectURL(file)}
                                                     alt={file.name}
-                                                    className="h-16 w-16 rounded-lg border border-slate-200 object-cover"
+                                                    className="h-16 w-20 rounded-xl border border-line bg-linen object-cover"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => removeNewImage(i)}
-                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs leading-none text-white shadow"
+                                                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-xs leading-none text-card shadow"
                                                     aria-label={`Remove ${file.name}`}
                                                 >
                                                     ×
@@ -683,19 +689,19 @@ export default function ProductEditModal({ product, onClose, onUpdated }) {
                                 )}
                             </div>
 
-                            <div className="sticky bottom-0 -mx-5 flex flex-col-reverse gap-2 border-t border-slate-100 bg-white/95 px-5 py-4 backdrop-blur-sm sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
+                            <div className="sticky bottom-0 -mx-5 flex flex-col-reverse gap-2 border-t border-line bg-card/95 px-5 py-4 backdrop-blur-md sm:-mx-6 sm:flex-row sm:justify-end sm:px-6">
                                 <button
                                     type="button"
                                     onClick={onClose}
                                     disabled={submitting}
-                                    className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                    className="rounded-full px-4 py-2 text-sm font-medium text-stone transition hover:bg-linen hover:text-ink disabled:opacity-40"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-moss px-6 py-2 text-sm font-medium text-card transition hover:bg-moss/90 disabled:opacity-50"
                                 >
                                     {submitting && (
                                         <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 animate-spin">

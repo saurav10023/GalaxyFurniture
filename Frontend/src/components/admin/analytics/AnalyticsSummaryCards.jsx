@@ -11,37 +11,37 @@ const CARD_DEFS = [
         label: "Total sales",
         format: (v) => v ?? 0,
         Icon: IconSales,
-        tint: "bg-slate-100 text-slate-600"
+        tint: "bg-linen text-stone"
     },
     {
         key: "totalRevenue",
         label: "Revenue",
         format: money,
         Icon: IconRevenue,
-        tint: "bg-indigo-50 text-indigo-600"
+        tint: "bg-moss/10 text-moss"
     },
     {
         key: "estimatedProfit",
         label: "Estimated profit",
         format: money,
         Icon: IconProfit,
-        tint: "bg-emerald-50 text-emerald-600",
-        accent: "text-emerald-700"
+        tint: "bg-clay/15 text-clay",
+        accent: "text-moss"
     },
     {
         key: "pendingPayments",
         label: "Pending payments",
         format: money,
         Icon: IconPending,
-        tint: "bg-amber-50 text-amber-600",
-        accent: "text-amber-700"
+        tint: "bg-clay/15 text-clay",
+        accent: "text-clay"
     },
     {
         key: "stockValue",
         label: "Stock value",
         format: money,
         Icon: IconStock,
-        tint: "bg-sky-50 text-sky-600"
+        tint: "bg-linen text-stone"
     }
 ];
 
@@ -78,7 +78,7 @@ export default function AnalyticsSummaryCards({ dateFrom, dateTo }) {
 
     if (error) {
         return (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">{error}</div>
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</div>
         );
     }
 
@@ -87,16 +87,16 @@ export default function AnalyticsSummaryCards({ dateFrom, dateTo }) {
             {CARD_DEFS.map(({ key, label, format, Icon, tint, accent }) => (
                 <div
                     key={key}
-                    className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col gap-3 hover:border-slate-300 transition-colors"
+                    className="rounded-3xl border border-line bg-card p-4 flex flex-col gap-3 hover:border-clay/50 transition-colors"
                 >
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${tint}`}>
+                    <div className={`h-9 w-9 rounded-full flex items-center justify-center ${tint}`}>
                         <Icon className="h-4 w-4" />
                     </div>
                     <div>
-                        <div className="text-xs text-slate-500">{label}</div>
-                        <div className={`text-lg font-semibold mt-0.5 ${accent || "text-slate-900"}`}>
+                        <div className="text-xs text-stone">{label}</div>
+                        <div className={`font-display text-2xl font-semibold mt-0.5 ${accent || "text-ink"}`}>
                             {loading ? (
-                                <span className="inline-block h-5 w-16 bg-slate-100 rounded animate-pulse" />
+                                <span className="inline-block h-6 w-16 bg-linen rounded-full animate-pulse" />
                             ) : (
                                 format(overview?.[key])
                             )}
