@@ -9,7 +9,7 @@ import Analytics from "../pages/Admin/Analytics";
 import PaymentsDue from "../pages/Admin/PaymentsDue";
 import PaymentsHistory from "../pages/Admin/PaymentsHistory";
 import SalesHistory from "../pages/Admin/SalesHistory";
-import AdminDashboard from "../pages/Admin/AdminDashBoard";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
 
 // Mount this at /admin/* in your main router, e.g.:
 //   <Route path="/admin/*" element={<AdminRoutes />} />
