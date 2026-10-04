@@ -1,21 +1,23 @@
+
 import axios from "axios";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true
+  withCredentials: true,
 });
 
 // ---------------------------------------------------------------------------
 // Local storage helpers
 // ---------------------------------------------------------------------------
-// "user" always holds the admin document returned by the backend (minus
-// password/refreshToken, per .select("-password -refreshToken") in the
-// controller) — NOT the raw token. Keeping the key name "user" so existing
-// code that reads it (AuthContext, the session-expired handler, etc.) keeps
-// working without a rename.
+
 const setSession = ({ admin, accessToken } = {}) => {
-  if (admin) localStorage.setItem("user", JSON.stringify(admin));
-  if (accessToken) localStorage.setItem("accessToken", accessToken);
+  if (admin) {
+    localStorage.setItem("user", JSON.stringify(admin));
+  }
+
+  if (accessToken) {
+    localStorage.setItem("accessToken", accessToken);
+  }
 };
 
 const clearSession = () => {
@@ -25,7 +27,11 @@ const clearSession = () => {
 
 const getStoredUser = () => {
   const raw = localStorage.getItem("user");
-  if (!raw) return null;
+
+  if (!raw) {
+    return null;
+  }
+
   try {
     return JSON.parse(raw);
   } catch {
@@ -33,19 +39,27 @@ const getStoredUser = () => {
   }
 };
 
-// Merged Request Interceptor
+// ---------------------------------------------------------------------------
+// Request interceptor
+// ---------------------------------------------------------------------------
+
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// --- Shared refresh state (fixes concurrent-401 race condition) ---
+// ---------------------------------------------------------------------------
+// Shared refresh state
+// ---------------------------------------------------------------------------
+
 let isRefreshing = false;
 let refreshPromise = null;
 
@@ -53,88 +67,137 @@ const performRefresh = async () => {
   const res = await axios.post(
     `${import.meta.env.VITE_API_URL}/api/v1/admin/refresh-token`,
     {},
-    { withCredentials: true }
+    {
+      withCredentials: true,
+    }
   );
 
-  // refreshAccessToken controller only returns { accessToken, refreshToken }
-  // — no admin object — so this only ever touches the "accessToken" key,
-  // leaving whatever admin data is already stored under "user" untouched.
   const newAccessToken = res.data.data?.accessToken;
-  if (newAccessToken) {
-    localStorage.setItem("accessToken", newAccessToken);
+
+  if (!newAccessToken) {
+    throw new Error("Refresh token did not return an access token");
   }
+
+  localStorage.setItem("accessToken", newAccessToken);
+
   return newAccessToken;
 };
 
-// Response Interceptor for handling 401s and Token Refresh
+// ---------------------------------------------------------------------------
+// Response interceptor
+// ---------------------------------------------------------------------------
+
 API.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // If a refresh is already in flight, piggyback on it instead of
-        // firing a second /refresh-token call (avoids rotation races).
-        if (!isRefreshing) {
-          isRefreshing = true;
-          refreshPromise = performRefresh().finally(() => {
-            isRefreshing = false;
-          });
-        }
-
-        await refreshPromise;
-
-        return API(originalRequest);
-      } catch (refreshError) {
-        clearSession();
-
-        // Dispatch instead of hard-reloading, so the app can navigate
-        // via the router (no full page reload / lost SPA state).
-        // Listen for this in App.jsx / a top-level component with useNavigate.
-        window.dispatchEvent(new CustomEvent("auth:session-expired"));
-
-        return Promise.reject(refreshError);
-      }
+    if (!originalRequest) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    // Only handle 401 responses.
+    if (error.response?.status !== 401) {
+      return Promise.reject(error);
+    }
+
+    // ---------------------------------------------------------
+    // IMPORTANT:
+    // If there is no access token, there is no admin session.
+    //
+    // This is NORMAL for a normal visitor.
+    // Do NOT try refresh and do NOT redirect to login.
+    // ---------------------------------------------------------
+
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      return Promise.reject(error);
+    }
+
+    // Prevent infinite retry loops.
+    if (originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      // -------------------------------------------------------
+      // If another request is already refreshing, wait for it.
+      // -------------------------------------------------------
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        refreshPromise = performRefresh().finally(() => {
+          isRefreshing = false;
+          refreshPromise = null;
+        });
+      }
+
+      await refreshPromise;
+
+      // Retry original request with the new access token.
+      return API(originalRequest);
+    } catch (refreshError) {
+      // -------------------------------------------------------
+      // The existing admin session is genuinely expired.
+      //
+      // Clear the local admin session.
+      //
+      // DO NOT navigate to /login here.
+      // AdminRouteGuard will handle /admin/*.
+      // Normal pages remain accessible.
+      // -------------------------------------------------------
+
+      clearSession();
+
+      return Promise.reject(refreshError);
+    }
   }
 );
 
 // ---------------------------------------------------------------------------
-// Admin auth endpoints
+// Admin authentication endpoints
 // ---------------------------------------------------------------------------
-// Mirrors controllers/auth.controller.js + the Admin model 1:1:
-//   - mobileNumber is the login identifier (not email)
-//   - login response body is { admin, accessToken, refreshToken } even
-//     though both tokens are also set as httpOnly cookies server-side
-//   - registerAdmin is NOT public — it requires an existing admin's token
-//     (verifyJWT + verifyAdmin on the route), so it's exposed here for the
-//     admin dashboard's "add staff/admin" flow, not a public signup form
-//
-// Route names confirmed against AuthContext: login, logout, refresh-token,
-// current-admin. Adjust AUTH_BASE below if admin.routes.js mounts elsewhere.
+
 const AUTH_BASE = "/api/v1/admin";
 
+// Login
 export const loginAdmin = async ({ mobileNumber, password }) => {
-  const res = await API.post(`${AUTH_BASE}/login`, { mobileNumber, password });
+  const res = await API.post(`${AUTH_BASE}/login`, {
+    mobileNumber,
+    password,
+  });
+
   const { admin, accessToken } = res.data.data;
-  setSession({ admin, accessToken });
+
+  setSession({
+    admin,
+    accessToken,
+  });
+
   return admin;
 };
 
-export const registerAdmin = async ({ mobileNumber, username, password }) => {
+// Register another admin/staff member
+export const registerAdmin = async ({
+  mobileNumber,
+  username,
+  password,
+}) => {
   const res = await API.post(`${AUTH_BASE}/register`, {
     mobileNumber,
     username,
-    password
+    password,
   });
-  return res.data.data; // newly created admin — does not log the caller in
+
+  return res.data.data;
 };
 
+// Logout
 export const logoutAdmin = async () => {
   try {
     await API.post(`${AUTH_BASE}/logout`);
@@ -143,12 +206,27 @@ export const logoutAdmin = async () => {
   }
 };
 
+// Get currently logged-in admin
 export const fetchCurrentAdmin = async () => {
   const res = await API.get(`${AUTH_BASE}/current-admin`);
+
   const admin = res.data.data;
-  setSession({ admin });
+
+  setSession({
+    admin,
+  });
+
   return admin;
 };
 
-export { getStoredUser, clearSession };
+// ---------------------------------------------------------------------------
+// Exports
+// ---------------------------------------------------------------------------
+
+export {
+  getStoredUser,
+  clearSession,
+};
+
 export default API;
+
