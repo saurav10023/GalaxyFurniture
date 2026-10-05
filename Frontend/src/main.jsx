@@ -11,6 +11,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import AdminRoutes from './routes/AdminRoutes.jsx'
 import ProductView from './pages/ProductView.jsx'
 import Shop from './pages/Shop.jsx'
+import Contact from './pages/Contact.jsx'
 
 const router = createBrowserRouter([
     {
@@ -21,7 +22,8 @@ const router = createBrowserRouter([
         { path: "/login", element: <AdminLogin/> },
         { path: "/admin/*", element: <AdminRoutes/> },
         {path:"/product/:id", element:<ProductView/>},
-        {path:"/shop" , element:<Shop/>}
+        {path:"/shop" , element:<Shop/>},
+        {path:"/contact" , element : <Contact/>}
       ]
     }
   ])

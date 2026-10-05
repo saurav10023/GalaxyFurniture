@@ -14,11 +14,11 @@ export const displayName = (field) => {
 export const SITE = {
   name: "Galaxy Furniture",
   tagline: "Natural living",
-  address: ["Galaxy Novelty", "Near Post Office, 835223", "Simdega, Jharkhand"],
-  email: "galaxynovelty@gmail.com",
-  phone: "+91 9386221222",
-  phoneHref: "tel:+919386221222",
-  whatsappNumber: "919931076119",
+  address: ["Galaxy Furniture", " Saldega Road, near Bal Bharti School, 835223", "Simdega, Jharkhand"],
+  email: "galaxyfurniture6398@gmail.com",
+  phone: "+91 7004187574",
+  phoneHref: "tel:+917004187574",
+  whatsappNumber: "917004187574",
   mapsHref: "https://www.google.com/maps/search/?api=1&query=Galaxy+Novelty+Simdega+Jharkhand",
 };
 

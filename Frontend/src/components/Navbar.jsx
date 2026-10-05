@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
-// Floating, frosted "pill" navbar in a deeper sand shade than the page.
+// Seamless navbar: fully transparent at the top of the page (blends into the
+// page background), turns into a light frosted pill once you scroll.
 // Active category = solid olive pill. Mobile = slide-in drawer with search.
 
 import { useEffect, useRef, useState } from "react";
@@ -18,11 +19,11 @@ const navIdle = "text-ink/75 hover:text-ink hover:bg-white/50";
 const navActive = "bg-moss text-paper shadow-[0_6px_16px_-8px_rgba(57,58,34,0.8)]";
 
 const BrandMark = ({ onClick }) => (
-  <Link to="/" onClick={onClick} className="flex items-center gap-2.5 shrink-0 group">
-    <span className="w-10 h-10 rounded-full bg-white ring-1 ring-black/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
+  <Link to="/" onClick={onClick} className="flex items-center gap-2 sm:gap-2.5 shrink-0 group min-w-0">
+    <span className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/80 ring-1 ring-black/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
       <img src={logo} alt="Galaxy Furniture" className="w-full h-full object-cover" />
     </span>
-    <span className="font-serif text-[23px] font-semibold text-ink tracking-[0.02em] leading-none hidden sm:block">
+    <span className="font-serif text-[17px] sm:text-[23px] font-semibold text-ink tracking-[0.04em] sm:tracking-[0.02em] leading-none whitespace-nowrap">
       GALAXY <span className="text-clay italic font-medium">Furniture</span>
     </span>
   </Link>
@@ -144,10 +145,10 @@ const Navbar = () => {
     <>
       <header className="sticky top-0 z-50 px-3 sm:px-5 pt-3">
         <div
-          className={`mx-auto max-w-7xl rounded-full border backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 ${
+          className={`mx-auto max-w-7xl rounded-full border transition-all duration-500 ${
             scrolled
-              ? "bg-[#E5DBC7]/85 border-white/60 shadow-[0_18px_40px_-18px_rgba(42,37,31,0.5)]"
-              : "bg-[#EAE1CF]/70 border-white/50 shadow-[0_10px_26px_-18px_rgba(42,37,31,0.35)]"
+              ? "bg-[#F1EADB]/75 backdrop-blur-xl backdrop-saturate-150 border-white/50 shadow-[0_12px_32px_-20px_rgba(42,37,31,0.35)]"
+              : "bg-transparent backdrop-blur-0 border-transparent shadow-none"
           }`}
         >
           <div

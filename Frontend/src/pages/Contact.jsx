@@ -1,35 +1,14 @@
 // src/pages/Contact.jsx
 //
-// Everything the user needs to fill in is marked with a `// FILL IN:` comment
-// and an obvious placeholder value -- search this file for "FILL IN" to find
-// every spot that needs a real value before shipping.
+// All shop details come from the shared SITE object in src/lib/site.js, so the
+// Contact page and Footer always show the same address, phone and email.
 
 import { useState } from "react";
+import { SITE, whatsappLink } from "../lib/site";
 
-// ---------------------------------------------------------------------
-// FILL IN: your details here
-// ---------------------------------------------------------------------
-const CONTACT = {
-  address: {
-    line1: "Galaxy Novelty ",
-    line2: "Near Post Office 835223",
-    line3: "Simdega",
-  },
-  email: "galaxynovelty@gmail.com",
-  whatsapp: "+91 9931076119", 
-  whatsappDial: "91 9931076119", 
-
-  mobiles: [
-    { label: "Sales", number: "+91 9386221222" },
-    { label: "Mobile Service", number: "+91 8789272797" },
-    { label: "General enquiries", number: "+91 9471777171" },
-  ],
-  // FILL IN: replace with your own embed URL --
-  // Google Maps > search your address > Share > Embed a map > copy the src="..." value
-  mapEmbedSrc:
-    "https://www.google.com/maps?q=R7uYh9aVYbwzeRhW8+Street,+Simdega,+Jharkhand+835223&output=embed"
-};
-// ---------------------------------------------------------------------
+// Map pin matches the "Open in Google Maps" link used in the footer.
+const MAP_QUERY = "Galaxy Novelty Simdega Jharkhand";
+const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&output=embed`;
 
 const MailIcon = () => (
   <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
@@ -81,7 +60,7 @@ const CopyButton = ({ value }) => {
   return (
     <button
       onClick={handleCopy}
-      className="text-[11.5px] font-medium text-[#9CA0A6] hover:text-[#2F5DFF] transition-colors duration-150 shrink-0"
+      className="text-[11.5px] font-medium text-stone hover:text-moss transition-colors duration-150 shrink-0"
     >
       {copied ? "Copied" : "Copy"}
     </button>
@@ -89,36 +68,38 @@ const CopyButton = ({ value }) => {
 };
 
 const SectionCard = ({ icon, title, children }) => (
-  <div className="rounded-xl border border-[#E1E3DD] bg-white p-5">
+  <div className="rounded-2xl border border-line bg-card p-5">
     <div className="flex items-center gap-2.5 mb-4">
-      <span className="w-9 h-9 rounded-full bg-[#F6F7F3] flex items-center justify-center text-[#14171C]">
+      <span className="w-9 h-9 rounded-full bg-linen flex items-center justify-center text-clay">
         {icon}
       </span>
-      <h3 className="font-display text-[15px] font-semibold text-[#14171C]">{title}</h3>
+      <h3 className="font-display text-[15px] font-semibold text-ink">{title}</h3>
     </div>
     {children}
   </div>
 );
 
 const Contact = () => {
+  const addressLines = SITE.address.map((l) => l.trim()).filter(Boolean);
+
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-10 py-10">
       <div className="mb-8">
-        <h1 className="font-display text-[26px] font-semibold text-[#14171C] tracking-tight">
+        <h1 className="font-display text-[26px] font-semibold text-ink tracking-tight">
           Get in touch
         </h1>
-        <p className="text-[13.5px] text-[#4B4F57] mt-1">
-          Visit the store, call, or message us on WhatsApp.
+        <p className="text-[13.5px] text-stone mt-1">
+          Visit the showroom, call, or message us on WhatsApp.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
         {/* Left half: map + address */}
-        <div className="flex flex-col rounded-xl border border-[#E1E3DD] overflow-hidden bg-white">
+        <div className="flex flex-col rounded-2xl border border-line overflow-hidden bg-card">
           <div className="flex-1 min-h-[320px]">
             <iframe
-              title="Store location"
-              src={CONTACT.mapEmbedSrc}
+              title="Showroom location"
+              src={MAP_EMBED_SRC}
               width="100%"
               height="100%"
               style={{ border: 0, display: "block", minHeight: 320 }}
@@ -126,64 +107,67 @@ const Contact = () => {
               referrerPolicy="no-referrer-when-downgrade"
             />
           </div>
-          <div className="p-5 border-t border-[#E1E3DD]">
-            <h4 className="font-mono text-[10.5px] uppercase tracking-wider text-[#9CA0A6] mb-2">
-              Store address
-            </h4>
-            <address className="not-italic text-[14px] text-[#14171C] leading-relaxed">
-              {CONTACT.address.line1}
-              <br />
-              {CONTACT.address.line2}
-              <br />
-              {CONTACT.address.line3}
-            </address>
+          <div className="p-5 border-t border-line flex items-start justify-between gap-4">
+            <div>
+              <h4 className="font-mono text-[10.5px] uppercase tracking-wider text-stone mb-2">
+                Showroom address
+              </h4>
+              <address className="not-italic text-[14px] text-ink leading-relaxed">
+                {addressLines.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </address>
+            </div>
+            <a
+              href={SITE.mapsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 rounded-full bg-moss text-paper text-[12.5px] font-medium px-4 py-2 hover:bg-moss-dark transition-colors"
+            >
+              Open in Maps
+            </a>
           </div>
         </div>
 
-        {/* Right half: email, whatsapp, mobile numbers */}
+        {/* Right half: email, whatsapp, phone */}
         <div className="flex flex-col gap-5">
           <SectionCard icon={<MailIcon />} title="Email">
             <div className="flex items-center justify-between gap-3">
               <a
-                href={`mailto:${CONTACT.email}`}
-                className="font-mono text-[14px] text-[#14171C] hover:text-[#2F5DFF] transition-colors duration-150 break-all"
+                href={`mailto:${SITE.email}`}
+                className="font-mono text-[14px] text-ink hover:text-moss transition-colors duration-150 break-all"
               >
-                {CONTACT.email}
+                {SITE.email}
               </a>
-              <CopyButton value={CONTACT.email} />
+              <CopyButton value={SITE.email} />
             </div>
           </SectionCard>
 
           <SectionCard icon={<WhatsAppIcon />} title="WhatsApp">
             <div className="flex items-center justify-between gap-3">
               <a
-                href={`https://wa.me/${CONTACT.whatsappDial}`}
+                href={whatsappLink()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[14px] text-[#14171C] hover:text-[#2F5DFF] transition-colors duration-150"
+                className="font-mono text-[14px] text-ink hover:text-moss transition-colors duration-150"
               >
-                {CONTACT.whatsapp}
+                {SITE.phone}
               </a>
-              <CopyButton value={CONTACT.whatsapp} />
+              <CopyButton value={SITE.phone} />
             </div>
           </SectionCard>
 
           <SectionCard icon={<PhoneIcon />} title="Call us">
-            <div className="flex flex-col gap-3">
-              {CONTACT.mobiles.map((m) => (
-                <div key={m.number} className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11.5px] text-[#9CA0A6] mb-0.5">{m.label}</p>
-                    <a
-                      href={`tel:${m.number.replace(/\s/g, "")}`}
-                      className="font-mono text-[14px] text-[#14171C] hover:text-[#2F5DFF] transition-colors duration-150"
-                    >
-                      {m.number}
-                    </a>
-                  </div>
-                  <CopyButton value={m.number} />
-                </div>
-              ))}
+            <div className="flex items-center justify-between gap-3">
+              <a
+                href={SITE.phoneHref}
+                className="font-mono text-[14px] text-ink hover:text-moss transition-colors duration-150"
+              >
+                {SITE.phone}
+              </a>
+              <CopyButton value={SITE.phone} />
             </div>
           </SectionCard>
         </div>

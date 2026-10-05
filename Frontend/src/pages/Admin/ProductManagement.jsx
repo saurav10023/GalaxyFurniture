@@ -13,6 +13,24 @@ const TABS = [
     { key: "category", label: "New category" }
 ];
 
+// Shared glass card shell used by every section on the page.
+const glassCard =
+    "relative rounded-[28px] border border-white/60 bg-gradient-to-b from-white/70 via-white/55 to-white/40 " +
+    "backdrop-blur-xl shadow-[0_20px_50px_-28px_rgba(42,37,31,0.4),inset_0_1px_0_rgba(255,255,255,0.9)]";
+
+function SectionHeader({ eyebrow, title, description, children }) {
+    return (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-5">
+            <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-clay">{eyebrow}</p>
+                <h2 className="font-display text-xl sm:text-2xl font-semibold text-ink mt-1">{title}</h2>
+                {description && <p className="text-sm text-stone mt-1">{description}</p>}
+            </div>
+            {children}
+        </div>
+    );
+}
+
 export default function ProductManagement() {
     const [activeTab, setActiveTab] = useState("product");
     const [refreshKey, setRefreshKey] = useState(0);
@@ -37,52 +55,89 @@ export default function ProductManagement() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 p-4 sm:p-6 lg:p-8 text-ink">
-            <div className="flex items-center gap-3">
-                <div className="hidden sm:flex h-11 w-11 rounded-full bg-linen text-clay items-center justify-center shrink-0">
-                    <IconProducts className="h-5 w-5" />
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8 text-ink">
+            {/* Page header */}
+            <div className="flex items-center gap-4">
+                <div
+                    className="flex h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-gradient-to-br from-moss to-moss/80 text-card items-center justify-center shrink-0
+                        shadow-[0_12px_24px_-12px_rgba(57,58,34,0.85),inset_0_1px_0_rgba(255,255,255,0.3)]"
+                >
+                    <IconProducts className="h-6 w-6" />
                 </div>
-                <div>
-                    <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink">Products</h1>
-                    <p className="text-sm text-stone mt-0.5">
+                <div className="min-w-0">
+                    <h1 className="font-display text-2xl sm:text-4xl font-semibold text-ink leading-tight">Products</h1>
+                    <p className="text-sm sm:text-[15px] text-stone mt-0.5">
                         Create products and categories, and manage your existing catalog.
                     </p>
                 </div>
             </div>
 
-            <div className="rounded-3xl border border-line bg-card p-4 sm:p-6">
-                <div className="flex gap-2 mb-5 overflow-x-auto">
-                    {TABS.map((tab) => (
-                        <button
-                            key={tab.key}
-                            type="button"
-                            onClick={() => setActiveTab(tab.key)}
-                            className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
-                                activeTab === tab.key
-                                    ? "bg-moss text-card"
-                                    : "text-stone hover:bg-linen hover:text-ink"
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+            {/* Create section */}
+            <section className={`${glassCard} p-4 sm:p-7`}>
+                <SectionHeader
+                    eyebrow="Create"
+                    title={activeTab === "product" ? "Add a new product" : "Add a new category"}
+                    description={
+                        activeTab === "product"
+                            ? "Fill in the details to add a piece to your catalog."
+                            : "Group your products so customers can browse them easily."
+                    }
+                >
+                    {/* Segmented control */}
+                    <div
+                        role="tablist"
+                        className="inline-flex self-start sm:self-auto p-1 rounded-full bg-ink/5 border border-white/70 shadow-[inset_0_1px_2px_rgba(42,37,31,0.08)]"
+                    >
+                        {TABS.map((tab) => {
+                            const active = activeTab === tab.key;
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={active}
+                                    onClick={() => setActiveTab(tab.key)}
+                                    className={`px-4 sm:px-5 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200 ${
+                                        active
+                                            ? "bg-gradient-to-br from-moss to-moss/85 text-card shadow-[0_8px_18px_-8px_rgba(57,58,34,0.85),inset_0_1px_0_rgba(255,255,255,0.25)]"
+                                            : "text-ink/70 hover:text-ink hover:bg-white/60"
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </SectionHeader>
+
+                <div className="h-px bg-gradient-to-r from-transparent via-line to-transparent mb-5" />
 
                 {activeTab === "product" ? (
                     <ProductCreateForm onCreated={bumpRefresh} />
                 ) : (
                     <CategoryCreateForm onCreated={bumpRefresh} />
                 )}
-            </div>
+            </section>
 
-            <div className="border-t border-line pt-8">
-                <h2 className="font-display text-xl font-semibold text-ink mb-3">Categories</h2>
+            {/* Categories */}
+            <section className={`${glassCard} p-4 sm:p-7`}>
+                <SectionHeader
+                    eyebrow="Organise"
+                    title="Categories"
+                    description="Edit, reorder or disable the categories shown in your store."
+                />
                 <CategoryManagementBoard refreshKey={refreshKey} onEditCategory={handleEditCategory} />
-            </div>
+            </section>
 
-            <div className="border-t border-line pt-8">
+            {/* Products by category */}
+            <section className={`${glassCard} p-4 sm:p-7 overflow-hidden`}>
+                <SectionHeader
+                    eyebrow="Catalog"
+                    title="Products by category"
+                    description="Browse every product grouped by its category and edit it in place."
+                />
                 <CategoryProductsBoard refreshKey={refreshKey} onEditProduct={handleEditProduct} />
-            </div>
+            </section>
 
             {editingProduct && (
                 <ProductEditModal product={editingProduct} onClose={() => setEditingProduct(null)} onUpdated={handleProductUpdated} />
