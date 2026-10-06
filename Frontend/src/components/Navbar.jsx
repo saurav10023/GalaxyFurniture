@@ -14,7 +14,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, LayoutDashboard, LogIn, LogOut, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useCategories } from "../hooks/useCategories";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.PNG";
 
 // Set to false if you want ONLY the Menu button (no inline links on laptops).
 const SHOW_INLINE_NAV = true;
