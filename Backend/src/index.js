@@ -4,7 +4,7 @@ import { app } from "./app.js";
 import connectDB from "./db/index.js";
 
 console.log("🚀 index.js started");
-console.log("ENV CHECK:", process.env.MONGODB_URI);
+console.log("ENV CHECK:");
 
 connectDB()
   .then(() => {

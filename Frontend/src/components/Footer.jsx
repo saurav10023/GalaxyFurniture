@@ -5,7 +5,7 @@
 
 import { Link } from "react-router-dom";
 import { MapPin, MessageCircle, Mail, Phone } from "lucide-react";
-import logo from "../assets/galaxy-novelty-logo.png";
+import logo from "../assets/logo.png";
 import { useCategories } from "../hooks/useCategories";
 import { SITE, whatsappLink } from "../lib/site";
 

@@ -1,10 +1,13 @@
 // src/components/admin/layout/AdminTopbar.jsx
 // Sits directly under the site Navbar and uses the exact same look:
 // transparent at the top of the page, light frosted sand pill once you scroll.
+// On mobile the sidebar toggle is a floating glass button (AdminMenuFab),
+// so the top of the screen stays clear of a second menu control.
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { IconMenu, IconLogout } from "../icons/AdminIcons";
+import { IconLogout } from "../icons/AdminIcons";
+import AdminMenuFab from "./AdminMenuFab";
 
 const SCROLL_THRESHOLD = 12;
 
@@ -46,6 +49,9 @@ export default function AdminTopbar({ onMenuClick = () => {} }) {
                 scrolled ? "top-[66px]" : "top-[72px]"
             }`}
         >
+            {/* Mobile: floating liquid-glass sidebar toggle (portaled to <body>) */}
+            <AdminMenuFab onClick={onMenuClick} />
+
             <div
                 className={`mx-auto rounded-full border transition-all duration-500 ${
                     scrolled
@@ -54,20 +60,12 @@ export default function AdminTopbar({ onMenuClick = () => {} }) {
                 }`}
             >
                 <div
-                    className={`flex items-center justify-between gap-3 px-2.5 sm:px-3 transition-[height] duration-300 ${
+                    className={`flex items-center justify-between gap-3 px-3.5 sm:px-3 transition-[height] duration-300 ${
                         scrolled ? "h-[50px]" : "h-[56px]"
                     }`}
                 >
                     <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <button
-                            type="button"
-                            onClick={onMenuClick}
-                            className="md:hidden shrink-0 w-10 h-10 flex items-center justify-center rounded-full text-ink hover:bg-white/50 transition-colors"
-                            aria-label="Open navigation"
-                        >
-                            <IconMenu className="h-5 w-5" />
-                        </button>
-                        <h1 className="font-serif text-[19px] sm:text-[23px] font-semibold text-ink tracking-[0.02em] leading-none truncate sm:pl-2">
+                        <h1 className="font-serif text-[19px] sm:text-[23px] font-semibold text-ink tracking-[0.02em] leading-none truncate pl-[58px] md:pl-2">
                             {title}
                         </h1>
                     </div>
